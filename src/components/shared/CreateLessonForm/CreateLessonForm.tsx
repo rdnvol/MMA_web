@@ -26,6 +26,7 @@ import { mergeDateAndTime, minutesToTime } from "../../../utils/calendar";
 import { useGetCoachesQuery } from "../../../services/coaches";
 import { useGetLessonTypesQuery } from "../../../services/lessonTypes";
 import { createLesson } from "../../../services/lessons";
+import { useTranslation } from "react-i18next";
 
 const lessonOptions: LESSON_TYPES[] = [
   LESSON_TYPES.Personal,
@@ -61,6 +62,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { t } = useTranslation("common");
   const { data: coachesData = [] } = useGetCoachesQuery("");
   const { data: lessonTypesData = [] } = useGetLessonTypesQuery("");
 
@@ -180,7 +182,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           w="full"
           onClick={() => setView(VIEWS.SELECT_COACH)}
         >
-          <Button w="full">Book lesson</Button>
+          <Button w="full">{t("Book lesson")}</Button>
           <IconButton
             aria-label="book-lesson-icon"
             icon={<Icon as={FaPlus} />}
@@ -198,7 +200,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           justifyContent="space-between"
         >
           <Box boxSize="10" />
-          <Heading size="sm">Book lesson</Heading>
+          <Heading size="sm">{t("Book lesson")}</Heading>
           <IconButton
             variant="ghost"
             colorScheme={colorScheme}
@@ -373,7 +375,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onClick={submitForm}
             isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
           >
-            Book lesson
+            {t("Book lesson")}
           </Button>
         </Flex>
       </VStack>
@@ -402,7 +404,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onClick={submitForm}
             isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
           >
-            Book lesson
+            {t("Book lesson")}
           </Button>
         </Flex>
       </VStack>
