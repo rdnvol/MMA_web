@@ -5,19 +5,18 @@ import {
   PositionedEvent,
   slotDuration,
 } from "../constants/data";
+import getMatrixFromEvents from "./matrix";
 
 export type Calendar = Meeting[];
 export type Meeting = [number, number];
 
-type EventsLine = Event[];
-
 export function getCurrentWeek(today: Date) {
   const week = getWeek(today);
 
-  let currentWeek = [];
+  let currentWeek = [today];
 
-  let minDayOfWeek = today;
-  let maxDayOfWeek = today;
+  let minDayOfWeek = subDays(today, 1);
+  let maxDayOfWeek = addDays(today, 1);
 
   while (week === getWeek(minDayOfWeek)) {
     currentWeek.unshift(minDayOfWeek);
@@ -28,8 +27,6 @@ export function getCurrentWeek(today: Date) {
     currentWeek.push(maxDayOfWeek);
     maxDayOfWeek = addDays(maxDayOfWeek, 1);
   }
-
-  currentWeek = currentWeek.slice(1);
 
   return currentWeek;
 }
@@ -54,12 +51,6 @@ export function minutesToTime(minutes: number): string {
 // function printCalendar(calendar: Calendar) {
 //   console.log(calendar.map((meeting) => meeting.map(minutesToTime)));
 // }
-
-function compareEvents(eventA: Event, eventB: Event): number {
-  if (eventA.startTime > eventB.startTime) return 1;
-  if (eventA.startTime < eventB.startTime) return -1;
-  return 0;
-}
 
 function getFulfilledCalendar(
   calendar: Calendar,
@@ -115,59 +106,31 @@ function getMatchingAvailabilities(
   return matchingAvailabilities;
 }
 
-function getEventsLinesFromEvents(events: Event[]): EventsLine[] {
-  if (!events.length) {
-    return [];
-  }
-  events.sort(compareEvents);
-
-  const eventsLines: EventsLine[] = [[events[0]]];
-
-  for (let i = 1; i < events.length; i++) {
-    const currentEvent = events[i];
-    let isAdded = false;
-
-    for (let j = 0; j < eventsLines.length; j++) {
-      const previousEvent = eventsLines[j][eventsLines[j].length - 1];
-
-      if (previousEvent.endTime <= currentEvent.startTime) {
-        eventsLines[j].push(currentEvent);
-        isAdded = true;
-        break;
-      }
-    }
-
-    if (!isAdded) {
-      eventsLines.push([currentEvent]);
-    }
-  }
-
-  return eventsLines;
-}
-
 export function getPositionedEvents(
   events: Event[],
   dailyBounds: [number, number],
   slotDuration: number
 ): PositionedEvent[] {
-  const eventsLines: EventsLine[] = getEventsLinesFromEvents(events);
-  const positionedEvents: PositionedEvent[] = [];
+  const positionsMatrix = getMatrixFromEvents(
+    events,
+    dailyBounds,
+    slotDuration
+  );
 
-  eventsLines.forEach((eventsLine: EventsLine, index: number) => {
-    for (const event of eventsLine) {
-      positionedEvents.push({
-        ...event,
-        position: {
-          x: index / eventsLines.length,
-          y: (event.startTime - dailyBounds[0]) / slotDuration,
-          w: 1 / eventsLines.length,
-          h: (event.endTime - event.startTime) / slotDuration,
-        },
-      });
-    }
-  });
-
-  return positionedEvents;
+  return events.map((event: Event) => ({
+    ...event,
+    position: {
+      x: positionsMatrix.get(event.id).x1 / positionsMatrix.matrixWidth,
+      y: positionsMatrix.get(event.id).y1,
+      w:
+        (positionsMatrix.get(event.id).x2 -
+          positionsMatrix.get(event.id).x1 +
+          1) /
+        positionsMatrix.matrixWidth,
+      h:
+        positionsMatrix.get(event.id).y2 - positionsMatrix.get(event.id).y1 + 1,
+    },
+  }));
 }
 
 export function filterEventsByCoaches(
