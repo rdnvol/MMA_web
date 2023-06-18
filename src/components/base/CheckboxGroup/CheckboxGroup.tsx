@@ -31,6 +31,12 @@ const CheckboxCard: React.FC<CheckboxCardProps> = (
         borderWidth="1px"
         borderRadius="md"
         boxShadow="md"
+        _disabled={{
+          color: "gray.300",
+          cursor: "unset",
+          bg: "gray.100",
+          borderColor: `gray.100`,
+        }}
         _checked={{
           bg: `${colorScheme}.600`,
           color: "white",
@@ -50,6 +56,7 @@ export type RadioGroupProps = {
   value?: string[];
   onChange?: (value: string[]) => void;
   colorScheme?: string;
+  isDisabled?: boolean;
 };
 
 export const CheckboxGroup: React.FC<RadioGroupProps> = (
@@ -58,6 +65,7 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
   const { getCheckboxProps } = useCheckboxGroup({
     value: props.value,
     onChange: props.onChange,
+    isDisabled: props.isDisabled,
   });
 
   return (
@@ -72,7 +80,12 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
         const checkbox = getCheckboxProps({ value });
 
         return (
-          <CheckboxCard key={value} {...checkbox} colorScheme={colorScheme}>
+          <CheckboxCard
+            key={value}
+            {...checkbox}
+            colorScheme={colorScheme}
+            isDisabled={props.isDisabled}
+          >
             {label}
           </CheckboxCard>
         );

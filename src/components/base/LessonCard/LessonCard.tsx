@@ -70,8 +70,13 @@ export const LessonCard: React.FC<LessonCardProps> = (
       variant={"outline"}
     >
       <VStack h="100%" w="5px" minW="5px" spacing={0}>
-        {colors.map((bgColor) => (
-          <Box w="100%" h={`${100 / colors.length}%`} bgColor={bgColor} />
+        {colors.map((bgColor, index) => (
+          <Box
+            key={index}
+            w="100%"
+            h={`${100 / colors.length}%`}
+            bgColor={bgColor}
+          />
         ))}
       </VStack>
       <Flex direction="column" paddingX={1} overflow="hidden">

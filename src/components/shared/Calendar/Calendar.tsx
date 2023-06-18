@@ -23,6 +23,7 @@ import {
   updateCoachesOrder,
   getEventsByDateFromLessons,
   groupLessonsByDate,
+  getEventsByDate,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -54,9 +55,9 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
-  const { data: lessonsData } = useGetLessonsQuery("");
+  // const { data: lessonsData } = useGetLessonsQuery("");
 
-  const groupedLessons = groupLessonsByDate(lessonsData || []);
+  // const groupedLessons = groupLessonsByDate(lessonsData || []);
 
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
 
@@ -92,7 +93,8 @@ export const Calendar: React.FC = () => {
   );
 
   const renderDateColumn = (date: Date) => {
-    const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
+    // const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
+    const eventsByDate = getEventsByDate(date);
     const filteredEvents = filterEventsByCoaches(eventsByDate, filters.coaches);
     const positionedEvents = getPositionedEvents(
       filteredEvents,
@@ -100,7 +102,7 @@ export const Calendar: React.FC = () => {
       slotDuration
     );
     const freeSlots =
-      selectedLessonType && date.getDate() === 21
+      selectedLessonType && date.getDate() === 20
         ? getFreeSlots(
             eventsByDate,
             selectedLessonType,
@@ -128,6 +130,7 @@ export const Calendar: React.FC = () => {
   const renderLesson = (positionedEvent: PositionedEvent) => {
     return (
       <LessonCard
+        key={positionedEvent.id}
         position={positionedEvent.position}
         coaches={positionedEvent.coaches}
         label={positionedEvent.label}

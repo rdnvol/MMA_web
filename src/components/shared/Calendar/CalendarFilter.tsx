@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { COACHES } from "../../../constants/data";
+import { COACHES, coachesData } from "../../../constants/data";
 import { Coach } from "../../../models";
 import { useGetCoachesQuery } from "../../../services/coaches";
 
@@ -10,7 +10,7 @@ export type CalendarFilterProps = {
 };
 
 export const CalendarFilter: React.FC<CalendarFilterProps> = ({ onSearch }) => {
-  const { data: coachesData } = useGetCoachesQuery("");
+  // const { data: coachesData } = useGetCoachesQuery("");
 
   const [coaches, setCoaches] = useState<string[]>([]);
 

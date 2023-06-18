@@ -19,9 +19,14 @@ const lessonOptions: LESSON_TYPES[] = [
   LESSON_TYPES.SPLIT,
   LESSON_TYPES.GROUP,
   LESSON_TYPES.MASSAGE,
+  LESSON_TYPES.OTHER,
+];
+const singleCoachLessonTypes: LESSON_TYPES[] = [
+  LESSON_TYPES.SPLIT,
+  LESSON_TYPES.MASSAGE,
 ];
 const coachesOptions = coachesData.map((coach) => coach.name);
-const durationOptions = ["30", "60", "90"];
+const durationOptions = ["30", "60"];
 
 const colorScheme = "orange";
 
@@ -42,7 +47,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [selectedLessonType, setSelectedLessonType] = useState<string>(
+  const [selectedLessonType, setSelectedLessonType] = useState<LESSON_TYPES>(
     lessonOptions[0]
   );
   const [selectedCoaches, setSelectedCoaches] = useState<COACHES[]>([]);
@@ -53,7 +58,18 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [label, setLabel] = useState<string>("");
 
   const changeSelectedCoaches = (value: string[]) => {
+    if (
+      singleCoachLessonTypes.includes(selectedLessonType) &&
+      value.length > 1
+    ) {
+      return;
+    }
+
     setSelectedCoaches(value as COACHES[]);
+  };
+
+  const changeSelectedLessonType = (value: string) => {
+    setSelectedLessonType(value as LESSON_TYPES);
   };
 
   const showFreeSlots = (e: any) => {
@@ -98,8 +114,9 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           <RadioGroup
             options={lessonOptions}
             value={selectedLessonType}
-            onChange={setSelectedLessonType}
+            onChange={changeSelectedLessonType}
             colorScheme={colorScheme}
+            isDisabled={areFreeSlotsRequested}
           />
         </FormControl>
 
@@ -110,9 +127,10 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             value={selectedCoaches}
             onChange={changeSelectedCoaches}
             colorScheme={colorScheme}
+            isDisabled={areFreeSlotsRequested}
           />
         </FormControl>
-        <FormControl>
+        {/* <FormControl>
           <FormLabel>Duration</FormLabel>
           <RadioGroup
             options={durationOptions}
@@ -120,7 +138,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onChange={setSelectedDuration}
             colorScheme={colorScheme}
           />
-        </FormControl>
+        </FormControl> */}
         <Button
           colorScheme={colorScheme}
           type="button"

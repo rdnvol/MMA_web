@@ -29,6 +29,12 @@ const RadioCard: React.FC<RadioCardProps> = (props: RadioCardProps) => {
         borderWidth="1px"
         borderRadius="md"
         boxShadow="md"
+        _disabled={{
+          color: "gray.300",
+          cursor: "unset",
+          bg: "gray.100",
+          borderColor: `gray.100`,
+        }}
         _checked={{
           bg: `${colorScheme}.600`,
           color: "white",
@@ -48,6 +54,7 @@ export type RadioGroupProps = {
   value?: string;
   onChange?: (value: string) => void;
   colorScheme?: string;
+  isDisabled?: boolean;
 };
 
 export const RadioGroup: React.FC<RadioGroupProps> = (
@@ -57,6 +64,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = (
     name: "framework",
     value: props.value,
     onChange: props.onChange,
+    isDisabled: props.isDisabled,
   });
 
   const group = getRootProps();
@@ -67,7 +75,12 @@ export const RadioGroup: React.FC<RadioGroupProps> = (
         const radio = getRadioProps({ value });
 
         return (
-          <RadioCard key={value} {...radio} colorScheme={props.colorScheme}>
+          <RadioCard
+            key={value}
+            {...radio}
+            colorScheme={props.colorScheme}
+            isDisabled={props.isDisabled}
+          >
             {value}
           </RadioCard>
         );
