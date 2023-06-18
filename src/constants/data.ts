@@ -14,6 +14,7 @@ import {
 } from "../utils/calendar";
 
 export const DATE_FORMAT = "yyyy-MM-dd";
+export const TIME_FORMAT = "hh:mm";
 export const today = new Date();
 export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
@@ -452,6 +453,15 @@ export function getEventsByDate(date: Date): Event[] {
   return (calendarData[formattedDate] || []).map(dumpLessonToEvent);
 }
 
+export function getEventsByDateFromLessons(
+  date: Date,
+  lessons: Record<string, Lesson[]>
+) {
+  const formattedDate = format(date, DATE_FORMAT);
+
+  return (lessons[formattedDate] || []).map(dumpLessonToEvent);
+}
+
 export function addLesson(lesson: Lesson) {
   lessonsData.push(lesson);
 
@@ -528,7 +538,9 @@ export function updateCoachesOrder(
   refreshCalendarData();
 }
 
-function groupLessonsByDate(lessons: Lesson[]): Record<string, Lesson[]> {
+export function groupLessonsByDate(
+  lessons: Lesson[]
+): Record<string, Lesson[]> {
   const map: Record<string, Lesson[]> = {};
 
   for (const lesson of lessons) {

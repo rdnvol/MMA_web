@@ -14,7 +14,6 @@ import {
 import {
   currentWeek,
   timeData,
-  getEventsByDate,
   PositionedEvent,
   dailyBounds,
   slotDuration,
@@ -22,6 +21,8 @@ import {
   lessonTypesData,
   addLesson,
   updateCoachesOrder,
+  getEventsByDateFromLessons,
+  groupLessonsByDate,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -34,10 +35,15 @@ import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
-import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
+import CalendarFilter from "./CalendarFilter";
+import { useGetLessonsQuery } from "../../../services/lessons";
 
 const cakraHeight = 10;
 const cakraWidth = 40;
+
+type FiltersParams = {
+  coaches: COACHES[];
+};
 
 export const Calendar: React.FC = () => {
   const [selectedLessonType, setSelectedLessonType] = useState<
@@ -48,10 +54,16 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
-  const [selectedCoaches, setSelectedCoaches] = useState<COACHES[]>([]);
+  const { data: lessonsData } = useGetLessonsQuery("");
 
-  const changeSelectedCoaches = (value: string[]) => {
-    setSelectedCoaches(value as COACHES[]);
+  const groupedLessons = groupLessonsByDate(lessonsData || []);
+
+  const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
+
+  const search = (searchFilters: { coaches: string[] }) => {
+    setFilters({
+      coaches: searchFilters.coaches as COACHES[],
+    });
   };
 
   const renderHeader = (header: string | Date) => (
@@ -73,22 +85,22 @@ export const Calendar: React.FC = () => {
     </Flex>
   );
 
-  const renderTime = (data: string = "") => (
-    <Box key={data} w="50px" h={cakraHeight}>
-      {data}
+  const renderTime = (time: string = "") => (
+    <Box key={time} w="50px" h={cakraHeight}>
+      {time}
     </Box>
   );
 
   const renderDateColumn = (date: Date) => {
-    const eventsByDate = getEventsByDate(date);
-    const filteredEvents = filterEventsByCoaches(eventsByDate, selectedCoaches);
+    const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
+    const filteredEvents = filterEventsByCoaches(eventsByDate, filters.coaches);
     const positionedEvents = getPositionedEvents(
       filteredEvents,
       dailyBounds,
       slotDuration
     );
     const freeSlots =
-      selectedLessonType && date.getDate() === 20
+      selectedLessonType && date.getDate() === 21
         ? getFreeSlots(
             eventsByDate,
             selectedLessonType,
@@ -122,7 +134,7 @@ export const Calendar: React.FC = () => {
         lessonType={positionedEvent.lessonType}
         isFloating={positionedEvent.isFloating}
         orderedCoaches={positionedEvent.orderedCoaches}
-        selectedCoaches={selectedCoaches}
+        selectedCoaches={filters.coaches}
       />
     );
   };
@@ -209,14 +221,7 @@ export const Calendar: React.FC = () => {
       color="blackAlpha.700"
     >
       <GridItem pl="2" area={"nav"}>
-        <CheckboxGroup
-          options={[
-            { value: COACHES.Sasha, colorScheme: "red" },
-            { value: COACHES.Vika, colorScheme: "green" },
-          ]}
-          value={selectedCoaches}
-          onChange={changeSelectedCoaches}
-        />
+        <CalendarFilter onSearch={search} />
       </GridItem>
       <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
         <HStack

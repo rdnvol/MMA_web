@@ -7,8 +7,8 @@ export enum LESSON_TYPES {
 }
 
 export enum BUSY_LEVELS {
-  FULL = 1,
-  HALF = 0.5,
+  FULL = "full",
+  HALF = "half",
 }
 
 export interface Coach {

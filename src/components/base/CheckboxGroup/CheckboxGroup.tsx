@@ -46,7 +46,7 @@ const CheckboxCard: React.FC<CheckboxCardProps> = (
 };
 
 export type RadioGroupProps = {
-  options: string[] | { value: string; colorScheme: string }[];
+  options: string[] | { value: string; label?: string; colorScheme?: string }[];
   value?: string[];
   onChange?: (value: string[]) => void;
   colorScheme?: string;
@@ -63,6 +63,8 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
   return (
     <Flex gap={2} direction="row" flexWrap="wrap">
       {props.options.map((option) => {
+        const label =
+          typeof option === "string" ? option : option.label || option.value;
         const value = typeof option === "string" ? option : option.value;
         const colorScheme =
           typeof option === "string" ? props.colorScheme : option.colorScheme;
@@ -71,7 +73,7 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
 
         return (
           <CheckboxCard key={value} {...checkbox} colorScheme={colorScheme}>
-            {value}
+            {label}
           </CheckboxCard>
         );
       })}
