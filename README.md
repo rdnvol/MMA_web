@@ -51,6 +51,12 @@ small and middle deployments, and you shouldn’t feel obligated to use this
 feature. However we understand that this tool wouldn’t be useful if you couldn’t
 customize it when you are ready for it.
 
+## Autogenerate types from swagger
+To automatically generate types from BE run next command:
+### `npm run generate-api-types`
+NOTE: Don't forget to run BE using docker or if you want to use types from deployed environment
+change `http://localhost:3005/api-json` in `generate-api-types.sh` to valid swagger link
+
 ## Learn More
 
 You can learn more in the
