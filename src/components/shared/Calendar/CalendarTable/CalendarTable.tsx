@@ -18,6 +18,7 @@ export type CalendarTableProps = {
   lessonsData: Record<string, Lesson[]>;
   selectedLessonType?: LessonType;
   selectedDuration?: number;
+  selectedCoaches?: number[];
   selectedFreeSlot?: PositionedEvent;
   onSelectFreeSlot: (positionedEvent: PositionedEvent) => void;
   onSelectLesson: (event: Event) => void;
@@ -28,6 +29,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
   lessonsData,
   selectedLessonType,
   selectedDuration,
+  selectedCoaches,
   selectedFreeSlot,
   onSelectFreeSlot,
   onSelectLesson,
@@ -48,6 +50,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
           lessonsData={lessonsData}
           selectedLessonType={selectedLessonType}
           selectedDuration={selectedDuration}
+          selectedCoaches={selectedCoaches}
           selectedFreeSlot={selectedFreeSlot}
           onSelectFreeSlot={onSelectFreeSlot}
           onSelectLesson={onSelectLesson}

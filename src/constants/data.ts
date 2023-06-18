@@ -37,7 +37,7 @@ export type Event = {
   label: string;
   isFloating?: boolean;
   isHalfTime?: boolean;
-  coachOrder?: number[];
+  coachOrder?: Coach[];
 };
 
 export type EventsLine = Event[];
@@ -95,7 +95,9 @@ export function dumpLessonToEvent(lesson: Lesson): Event {
       lesson.lessonType.coaches.length > 1 &&
       !lesson.coachOrder?.length,
     isHalfTime: lesson.lessonType.coachBusyLevel === BUSY_LEVELS.Half,
-    coachOrder: lesson.coachOrder,
+    // TODO: delete!!!
+    coachOrder:
+      lesson.id === 40 ? [...lesson.coachOrder].reverse() : lesson.coachOrder,
   };
 }
 

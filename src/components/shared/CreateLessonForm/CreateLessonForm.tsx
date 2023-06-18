@@ -63,6 +63,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onCancel,
 }) => {
   const { t } = useTranslation("common");
+  const { t: tDOW } = useTranslation("dow");
   const { data: coachesData = [] } = useGetCoachesQuery("");
   const { data: lessonTypesData = [] } = useGetLessonTypesQuery("");
 
@@ -182,7 +183,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           w="full"
           onClick={() => setView(VIEWS.SELECT_COACH)}
         >
-          <Button w="full">{t("Book lesson")}</Button>
+          <Button w="full">{t("Create lesson")}</Button>
           <IconButton
             aria-label="book-lesson-icon"
             icon={<Icon as={FaPlus} />}
@@ -200,7 +201,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           justifyContent="space-between"
         >
           <Box boxSize="10" />
-          <Heading size="sm">{t("Book lesson")}</Heading>
+          <Heading size="sm">{t("Create lesson")}</Heading>
           <IconButton
             variant="ghost"
             colorScheme={colorScheme}
@@ -241,7 +242,11 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   .join(", ")}
             </Heading>
             <Text noOfLines={1}>
-              {selectedDate && format(selectedDate, "E dd")}
+              {selectedDate &&
+                `${tDOW(format(selectedDate, "E"))} ${format(
+                  selectedDate,
+                  "dd"
+                )}`}
               {selectedStartTime && `, ${selectedStartTime}`}
               {selectedEndTime && ` - ${selectedEndTime}`}
             </Text>
@@ -375,7 +380,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onClick={submitForm}
             isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
           >
-            {t("Book lesson")}
+            {t("Create")}
           </Button>
         </Flex>
       </VStack>
@@ -404,7 +409,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onClick={submitForm}
             isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
           >
-            {t("Book lesson")}
+            {t("Create")}
           </Button>
         </Flex>
       </VStack>

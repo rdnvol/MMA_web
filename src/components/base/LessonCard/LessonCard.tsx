@@ -16,7 +16,7 @@ const colorsMap: Record<COACHES, string> = {
 export type LessonCardProps = {
   label?: string;
   coaches: Coach[];
-  coachOrder?: number[];
+  coachOrder?: Coach[];
   position: Position;
   lessonType?: LessonType;
   isFloating?: boolean;
@@ -40,7 +40,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
     const coachesMap = arrayToMap<Coach>(props.coaches);
 
     const coaches: Coach[] = !!props.coachOrder?.length
-      ? props.coachOrder.map((c) => coachesMap[c])
+      ? props.coachOrder.map((c) => coachesMap[c.id])
       : props.coaches;
 
     let colors = [colorsMap[COACHES.Empty]];

@@ -10,6 +10,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { CoachEntity } from "./coachEntity";
 import { LessonTypeEntity } from "./lessonTypeEntity";
 import { ParticipantEntity } from "./participantEntity";
 
@@ -20,5 +21,5 @@ export class LessonDto {
   endDate: string;
   participants: Array<ParticipantEntity>;
   lessonType: LessonTypeEntity;
-  coachOrder: Array<number>;
+  coachOrder: Array<CoachEntity>;
 }

@@ -1,6 +1,7 @@
 {
   "common": {
-    "Book lesson": "Створити урок",
+    "Create lesson": "Створити урок",
+    "Create": "Створити",
     "Today": "Сьогодні",
     "Coaches": "Тренери",
     "Type": "Тип",

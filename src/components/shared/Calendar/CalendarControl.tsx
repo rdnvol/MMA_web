@@ -29,7 +29,8 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
   const { t } = useTranslation("common");
   const [, setSearchParams] = useSearchParams();
 
-  const { data: coachesData = [] } = useGetCoachesQuery("");
+  const { data: coachesData = [], isLoading: isCoachesDataLoading } =
+    useGetCoachesQuery("");
 
   const [coaches, setCoaches] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -46,8 +47,10 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
   }, [selectedDate, view, coaches, setSearchParams]);
 
   useEffect(() => {
-    setCoaches(coachesData.map((coach) => String(coach.id)));
-  }, [coachesData]);
+    if (!isCoachesDataLoading) {
+      setCoaches(coachesData.map((coach) => String(coach.id)));
+    }
+  }, [coachesData, isCoachesDataLoading]);
 
   const updateCoaches = (value: Array<string>) => {
     setCoaches(value);

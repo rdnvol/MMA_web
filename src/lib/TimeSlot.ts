@@ -209,9 +209,9 @@ function splitOrderedEvent(event: Event): Event[] {
 
   const coachesMap = arrayToMap<Coach>(event.coaches);
 
-  return coachOrder.map((coachId, index) => ({
+  return coachOrder.map((coach, index) => ({
     ...event,
-    coaches: [coachesMap[coachId]],
+    coaches: [coachesMap[coach.id]],
     startTime: startTime + index * orderDuration,
     endTime: startTime + (index + 1) * orderDuration,
   }));

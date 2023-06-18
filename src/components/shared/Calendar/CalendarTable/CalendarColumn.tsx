@@ -21,6 +21,7 @@ export type CalendarColumnProps = {
   lessonsData: Record<string, Lesson[]>;
   selectedLessonType?: LessonType;
   selectedDuration?: number;
+  selectedCoaches?: number[];
   selectedFreeSlot?: PositionedEvent;
   onSelectFreeSlot: (positionedEvent: PositionedEvent) => void;
   onSelectLesson: (event: Event) => void;
@@ -32,6 +33,7 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
   selectedLessonType,
   selectedDuration,
   selectedFreeSlot,
+  selectedCoaches,
   onSelectFreeSlot,
   onSelectLesson,
 }) => {
@@ -56,7 +58,10 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
   const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
   const width = isLargerThan600 ? cellWidth.md : cellWidth.sm;
 
-  const renderLesson = (positionedEvent: PositionedEvent) => {
+  const renderLesson = (
+    positionedEvent: PositionedEvent,
+    selectedCoaches?: number[]
+  ) => {
     return (
       <LessonCard
         key={positionedEvent.id}
@@ -66,7 +71,7 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
         lessonType={positionedEvent.lessonType}
         isFloating={positionedEvent.isFloating}
         coachOrder={positionedEvent.coachOrder}
-        //   selectedCoaches={filters.coaches}
+        selectedCoaches={selectedCoaches}
         onClick={() => onSelectLesson(positionedEvent)}
       />
     );
@@ -98,7 +103,7 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
           <TimeBox key={time} />
         ))}
 
-        {positionedEvents.map(renderLesson)}
+        {positionedEvents.map((event) => renderLesson(event, selectedCoaches))}
         {freeSlots.map(renderEmptySlot)}
       </Box>
     </VStack>

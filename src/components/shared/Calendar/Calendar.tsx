@@ -92,6 +92,7 @@ export const Calendar: React.FC = () => {
           lessonsData={lessonsData}
           selectedLessonType={selectedLessonType}
           selectedDuration={selectedDuration}
+          selectedCoaches={filters.coaches}
           selectedFreeSlot={selectedFreeSlot}
           onSelectFreeSlot={setSelectedFreeSlot}
           onSelectLesson={setSelectedEvent}
