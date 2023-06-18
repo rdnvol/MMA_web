@@ -20,7 +20,7 @@ export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
 export const dailyBounds: [number, number] = [
   timeToMinutes("8:00"),
-  timeToMinutes("18:00"),
+  timeToMinutes("21:00"),
 ];
 export const slotsNumber = (dailyBounds[1] - dailyBounds[0]) / slotDuration;
 export const timeData = Array.from({ length: slotsNumber }, (v, i) =>
@@ -292,7 +292,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "wed-2",
-    lessonType: lessonTypesData[8],
+    lessonType: lessonTypesData[5],
     participants: [participantsData[2], participantsData[3]],
     date: format(currentWeek[3], DATE_FORMAT),
     startTime: "9:00",
@@ -351,7 +351,7 @@ const lessonsData: Lesson[] = [
     lessonType: lessonTypesData[5],
     participants: [participantsData[2]],
     date: format(currentWeek[3], DATE_FORMAT),
-    startTime: "10:00",
+    startTime: "10:30",
     endTime: "11:30",
   },
   {
@@ -364,7 +364,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "thu-2",
-    lessonType: lessonTypesData[5],
+    lessonType: lessonTypesData[2],
     participants: [participantsData[4]],
     date: format(currentWeek[4], DATE_FORMAT),
     startTime: "10:00",
@@ -372,7 +372,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "thu-3",
-    lessonType: lessonTypesData[8],
+    lessonType: lessonTypesData[3],
     participants: [participantsData[3], participantsData[2]],
     date: format(currentWeek[4], DATE_FORMAT),
     startTime: "10:00",

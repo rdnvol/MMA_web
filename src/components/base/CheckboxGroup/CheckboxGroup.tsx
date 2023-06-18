@@ -33,14 +33,14 @@ const CheckboxCard: React.FC<CheckboxCardProps> = (
         boxShadow="md"
         _disabled={{
           color: "gray.300",
-          cursor: "unset",
+          cursor: "not-allowed",
           bg: "gray.100",
           borderColor: `gray.100`,
         }}
         _checked={{
-          bg: `${colorScheme}.600`,
+          bg: `${colorScheme}.500`,
           color: "white",
-          borderColor: `${colorScheme}.600`,
+          borderColor: `${colorScheme}.500`,
         }}
         px={5}
         py={3}

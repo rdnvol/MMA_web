@@ -101,16 +101,15 @@ export const Calendar: React.FC = () => {
       dailyBounds,
       slotDuration
     );
-    const freeSlots =
-      selectedLessonType && date.getDate() === 20
-        ? getFreeSlots(
-            eventsByDate,
-            selectedLessonType,
-            selectedDuration,
-            date,
-            dailyBounds
-          )
-        : [];
+    const freeSlots = selectedLessonType
+      ? getFreeSlots(
+          eventsByDate,
+          selectedLessonType,
+          selectedDuration,
+          date,
+          dailyBounds
+        )
+      : [];
 
     return (
       <VStack key={date.toDateString()} spacing={0}>
@@ -223,7 +222,7 @@ export const Calendar: React.FC = () => {
       gap="1"
       color="blackAlpha.700"
     >
-      <GridItem pl="2" area={"nav"}>
+      <GridItem pl="2" area={"nav"} boxShadow="md">
         <CalendarFilter onSearch={search} />
       </GridItem>
       <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
@@ -239,7 +238,7 @@ export const Calendar: React.FC = () => {
           {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
-      <GridItem pl="2" area={"form"}>
+      <GridItem pl="2" area={"form"} boxShadow="md">
         <CreateLessonForm
           selectedFreeSlot={selectedFreeSlot}
           onShowFreeSlots={showFreeSlots}

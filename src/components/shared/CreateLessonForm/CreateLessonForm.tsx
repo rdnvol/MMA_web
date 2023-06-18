@@ -6,6 +6,9 @@ import {
   VStack,
   Heading,
   Input,
+  Flex,
+  Tag,
+  TagLabel,
 } from "@chakra-ui/react";
 import { COACHES, coachesData, Event } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
@@ -100,37 +103,37 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   };
 
   return (
-    <form onSubmit={submitForm} onReset={resetForm}>
-      <VStack
-        w="300px"
-        paddingX={5}
-        alignItems="flex-start"
-        spacing={4}
-        overflow="hidden"
+    <form onSubmit={submitForm} onReset={resetForm} style={{ height: "100%" }}>
+      <Flex
+        flexDirection="column"
+        justifyContent="space-between"
+        h="full"
+        padding={5}
       >
-        <Heading size="md">Book lesson</Heading>
-        <FormControl>
-          <FormLabel>Lesson type</FormLabel>
-          <RadioGroup
-            options={lessonOptions}
-            value={selectedLessonType}
-            onChange={changeSelectedLessonType}
-            colorScheme={colorScheme}
-            isDisabled={areFreeSlotsRequested}
-          />
-        </FormControl>
+        <VStack alignItems="flex-start" spacing={4} overflow="hidden">
+          <Heading size="md">Book lesson</Heading>
+          <FormControl>
+            <FormLabel>Type</FormLabel>
+            <RadioGroup
+              options={lessonOptions}
+              value={selectedLessonType}
+              onChange={changeSelectedLessonType}
+              colorScheme={colorScheme}
+              isDisabled={areFreeSlotsRequested}
+            />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>Coaches</FormLabel>
-          <CheckboxGroup
-            options={coachesOptions}
-            value={selectedCoaches}
-            onChange={changeSelectedCoaches}
-            colorScheme={colorScheme}
-            isDisabled={areFreeSlotsRequested}
-          />
-        </FormControl>
-        {/* <FormControl>
+          <FormControl>
+            <FormLabel>Coaches</FormLabel>
+            <CheckboxGroup
+              options={coachesOptions}
+              value={selectedCoaches}
+              onChange={changeSelectedCoaches}
+              colorScheme={colorScheme}
+              isDisabled={areFreeSlotsRequested}
+            />
+          </FormControl>
+          {/* <FormControl>
           <FormLabel>Duration</FormLabel>
           <RadioGroup
             options={durationOptions}
@@ -139,47 +142,60 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             colorScheme={colorScheme}
           />
         </FormControl> */}
-        <Button
-          colorScheme={colorScheme}
-          type="button"
-          onClick={showFreeSlots}
-          isDisabled={areFreeSlotsRequested || selectedCoaches.length === 0}
-        >
-          Show free slots
-        </Button>
+          <Button
+            colorScheme={colorScheme}
+            type="button"
+            onClick={showFreeSlots}
+            isDisabled={areFreeSlotsRequested || selectedCoaches.length === 0}
+            w="full"
+          >
+            Show free slots
+          </Button>
 
-        <FormControl>
+          {selectedFreeSlot && (
+            <FormControl>
+              <FormLabel>Name</FormLabel>
+              <Input
+                value={label}
+                onChange={(evt) => setLabel(evt.target.value)}
+                autoFocus
+                colorScheme={colorScheme}
+              />
+            </FormControl>
+          )}
+        </VStack>
+
+        <VStack alignItems="flex-start">
+          <Flex width="full" justifyContent="flex-start" gap={2}>
+            {selectedFreeSlot && `${selectedCoaches.join(", ")}`}
+            {selectedFreeSlot && (
+              <Tag size="sm" variant="outline" colorScheme={colorScheme}>
+                <TagLabel>{selectedLessonType}</TagLabel>
+              </Tag>
+            )}
+          </Flex>
+
           <FormLabel>
             {selectedFreeSlot &&
-              `${format(selectedFreeSlot.date, "E dd")}: ${minutesToTime(
+              `${format(selectedFreeSlot.date, "E dd")}, ${minutesToTime(
                 selectedFreeSlot.startTime
               )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
           </FormLabel>
-        </FormControl>
 
-        {selectedFreeSlot && (
-          <FormControl>
-            <FormLabel>Participants</FormLabel>
-            <Input
-              value={label}
-              onChange={(evt) => setLabel(evt.target.value)}
-              autoFocus
+          <Flex width="full" justifyContent="space-between">
+            <Button
               colorScheme={colorScheme}
-            />
-          </FormControl>
-        )}
-
-        <Button
-          colorScheme={colorScheme}
-          type="submit"
-          isDisabled={!selectedFreeSlot}
-        >
-          Book lesson
-        </Button>
-        <Button colorScheme={"gray"} type="reset">
-          Cancel
-        </Button>
-      </VStack>
+              type="submit"
+              isDisabled={!selectedFreeSlot}
+            >
+              Book lesson
+            </Button>
+            <Button colorScheme={"gray"} type="reset">
+              Cancel
+            </Button>
+          </Flex>
+        </VStack>
+      </Flex>
     </form>
   );
 };
