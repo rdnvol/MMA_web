@@ -11,6 +11,7 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
+import { format, isToday } from "date-fns";
 
 import {
   currentWeek,
@@ -33,13 +34,14 @@ import {
   minutesToTime,
   filterEventsByCoaches,
 } from "../../../utils/calendar";
-import CreateLessonForm from "../CreateLessonForm";
-import LessonCard from "../../base/LessonCard";
-import { LessonType, LESSON_TYPES } from "../../../models";
-import { format, isToday } from "date-fns";
-import EmptySlotCard from "../../base/EmptySlotCard";
-import CalendarControl from "./CalendarControl";
 import { useGetLessonsQuery } from "../../../services/lessons";
+import { LessonType, LESSON_TYPES } from "../../../models";
+
+import LessonCard from "../../base/LessonCard";
+import EmptySlotCard from "../../base/EmptySlotCard";
+import TimeBox from "../../base/TimeBox";
+import CalendarControl from "./CalendarControl";
+import CreateLessonForm from "../CreateLessonForm";
 
 const cakraHeight = 10;
 
@@ -91,21 +93,6 @@ export const Calendar: React.FC = () => {
     </Flex>
   );
 
-  const renderTime = (time: string = "") => (
-    <Box
-      key={time}
-      w="full"
-      h={cakraHeight}
-      borderColor="gray.200"
-      borderTopWidth={1}
-      borderRightWidth={1}
-      textAlign="right"
-      p="1"
-    >
-      {time}
-    </Box>
-  );
-
   const renderDateColumn = (date: Date) => {
     // const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
     const eventsByDate = getEventsByDate(date);
@@ -133,7 +120,9 @@ export const Calendar: React.FC = () => {
           w={cakraWidth}
           h={cakraHeight * timeData.length}
         >
-          {timeData.map(() => renderTime())}
+          {timeData.map((time) => (
+            <TimeBox key={time} />
+          ))}
           {positionedEvents.map(renderLesson)}
           {freeSlots.map(renderEmptySlot)}
         </Box>
@@ -251,7 +240,9 @@ export const Calendar: React.FC = () => {
         <HStack spacing={0} alignItems="flex-start" position="relative">
           <VStack spacing={0} position="sticky" zIndex={2}>
             {renderHeader("Time")}
-            {timeData.map(renderTime)}
+            {timeData.map((time) => (
+              <TimeBox key={time}>{time}</TimeBox>
+            ))}
           </VStack>
           {currentWeek.map(renderDateColumn)}
         </HStack>

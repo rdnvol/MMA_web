@@ -198,7 +198,7 @@ const lessonsData: Lesson[] = [
     participants: [participantsData[6]],
     date: format(currentWeek[0], DATE_FORMAT),
     startTime: "8:00",
-    endTime: "18:00",
+    endTime: "21:00",
   },
 
   // {
@@ -441,7 +441,9 @@ export function dumpLessonToEvent(lesson: Lesson): Event {
     label: lesson.label || lesson.participants.map((p) => p.name).join(" + "),
     lessonType: lesson.lessonType.type,
     isFloating:
-      lesson.lessonType.coaches.length > 1 && !lesson.orderedCoaches?.length,
+      lesson.lessonType.type !== LESSON_TYPES.OTHER &&
+      lesson.lessonType.coaches.length > 1 &&
+      !lesson.orderedCoaches?.length,
     isHalfTime: lesson.lessonType.coachBusyLevel === BUSY_LEVELS.HALF,
     orderedCoaches: lesson.orderedCoaches?.map(
       (coach) => coach.name as COACHES

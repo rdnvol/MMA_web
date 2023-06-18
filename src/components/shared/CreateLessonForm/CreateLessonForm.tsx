@@ -272,7 +272,11 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           <Button colorScheme={"gray"} onClick={resetForm}>
             Cancel
           </Button>
-          <Button colorScheme={colorScheme} onClick={submitForm}>
+          <Button
+            colorScheme={colorScheme}
+            onClick={submitForm}
+            isDisabled={!selectedFreeSlot}
+          >
             Book lesson
           </Button>
         </Flex>
