@@ -22,7 +22,7 @@ export default class TimeSlotsMap {
 
     let time = bounds[0];
 
-    while (time < bounds[1]) {
+    while (time + duration <= bounds[1]) {
       timeSlotsMap[time] = new TimeSlot(time, duration);
       time += slotDuration;
     }
