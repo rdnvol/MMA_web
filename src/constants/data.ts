@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { addDays, format, isEqual, parse, parseISO } from "date-fns";
 import {
   BUSY_LEVELS,
   Coach,
@@ -9,14 +9,12 @@ import {
 import {
   minutesToTime,
   timeToMinutes,
-  getCurrentWeek,
   mergeDateAndMinutes,
 } from "../utils/calendar";
 
 export const DATE_FORMAT = "yyyy-MM-dd";
 export const TIME_FORMAT = "H:mm";
 export const today = new Date();
-export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
 export const dailyBounds: [number, number] = [
   timeToMinutes("8:00"),
@@ -61,6 +59,28 @@ export const coachesData: Coach[] = [
   { id: 1, email: "sasha@mma-app.com", name: "Sasha" },
   { id: 2, email: "vika@mma-app.com", name: "Vika" },
 ];
+
+export function getDateRange(start?: string, end?: string): Date[] {
+  if (!start || !end) {
+    return [];
+  }
+
+  const dateRange: Date[] = [];
+
+  const startDate = parse(start, DATE_FORMAT, new Date());
+  const endDate = parse(end, DATE_FORMAT, new Date());
+
+  let current = startDate;
+
+  while (!isEqual(current, endDate)) {
+    dateRange.push(current);
+    current = addDays(current, 1);
+  }
+
+  dateRange.push(current);
+
+  return dateRange;
+}
 
 export function dumpLessonToEvent(lesson: Lesson): Event {
   const startDate = new Date(lesson.startDate);

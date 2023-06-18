@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Grid, GridItem } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 
-import { currentWeek, PositionedEvent, Event } from "../../../constants/data";
+import { PositionedEvent, Event, getDateRange } from "../../../constants/data";
 import { useGetLessonsQuery, deleteLesson } from "../../../services/lessons";
 import { LessonType } from "../../../models";
 
@@ -29,7 +29,7 @@ export const Calendar: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const { data: lessonsData = {}, refetch: refetchLessons } =
-    useGetLessonsQuery("");
+    useGetLessonsQuery(searchParams.toString());
 
   useEffect(() => {
     const coaches = searchParams.getAll("coaches").map((coachId) => +coachId);
@@ -72,7 +72,10 @@ export const Calendar: React.FC = () => {
 
       <GridItem area={"calendar"} overflowX="scroll" h="100%">
         <CalendarTable
-          dateRange={currentWeek}
+          dateRange={getDateRange(
+            searchParams.get("startDate") || "",
+            searchParams.get("endDate") || ""
+          )}
           lessonsData={lessonsData}
           selectedLessonType={selectedLessonType}
           selectedDuration={selectedDuration}

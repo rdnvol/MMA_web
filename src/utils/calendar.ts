@@ -1,10 +1,5 @@
 import { addDays, getWeek, subDays } from "date-fns";
-import {
-  COACHES,
-  Event,
-  PositionedEvent,
-  slotDuration,
-} from "../constants/data";
+import { Event, PositionedEvent, slotDuration } from "../constants/data";
 import TimeSlot from "../lib/TimeSlot";
 import TimeSlotsMap from "../lib/TimeSlotsMap";
 import { LessonType } from "../models";
