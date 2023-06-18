@@ -32,7 +32,7 @@ import CalendarControl from "./CalendarControl";
 import CreateLessonForm from "../CreateLessonForm";
 import DeleteLessonModal from "./DeleteLessonModal";
 
-const cakraHeight = 10;
+const cellHeight = 40;
 
 type FiltersParams = {
   coaches: number[];
@@ -49,7 +49,7 @@ export const Calendar: React.FC = () => {
   >();
 
   const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
-  const cakraWidth = isLargerThan600 ? 40 : 20;
+  const cellWidth = isLargerThan600 ? 160 : 80;
 
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
   const [searchParams] = useSearchParams();
@@ -64,7 +64,19 @@ export const Calendar: React.FC = () => {
   }, [searchParams]);
 
   const renderHeader = (header: string | Date) => (
-    <Flex h={cakraHeight} alignItems="center" gap={2}>
+    <Flex
+      h={`${cellHeight}px`}
+      alignItems="center"
+      gap={2}
+      position="sticky"
+      top={0}
+      bg="white"
+      zIndex={2}
+      w="full"
+      justifyContent="center"
+      borderColor="gray.200"
+      borderBottomWidth={1}
+    >
       {typeof header === "string" ? (
         header
       ) : (
@@ -100,12 +112,12 @@ export const Calendar: React.FC = () => {
       : [];
 
     return (
-      <VStack key={date.toDateString()} spacing={0}>
+      <VStack key={date.toDateString()} spacing={0} position="relative">
         {renderHeader(date)}
         <Box
           position="relative"
-          w={cakraWidth}
-          h={cakraHeight * timeData.length}
+          w={`${cellWidth}px`}
+          h={`${cellHeight * timeData.length}px`}
         >
           {timeData.map((time) => (
             <TimeBox key={time} />
@@ -168,8 +180,9 @@ export const Calendar: React.FC = () => {
   return (
     <Grid
       templateAreas={`"control"
-                      "calendar"`}
-      gridTemplateRows={"60px 1fr"}
+                      "calendar"
+                      "form"`}
+      gridTemplateRows={"60px 1fr 50px"}
       gridTemplateColumns={"1fr"}
       h="100dvh"
       overflowY="hidden"
@@ -180,14 +193,9 @@ export const Calendar: React.FC = () => {
         <CalendarControl />
       </GridItem>
 
-      <GridItem
-        area={"calendar"}
-        overflowX="scroll"
-        h="100%"
-        paddingBottom={50}
-      >
+      <GridItem area={"calendar"} overflowX="scroll" h="100%">
         <HStack spacing={0} alignItems="flex-start" position="relative">
-          <VStack spacing={0} position="sticky" zIndex={2}>
+          <VStack spacing={0} position="sticky" zIndex={2} left={0} bg="white">
             {renderHeader("Time")}
             {timeData.map((time) => (
               <TimeBox key={time}>{time}</TimeBox>

@@ -8,7 +8,7 @@ export const TimeBox: React.FC<React.PropsWithChildren> = ({ children }) => (
     w="full"
     h={cakraHeight}
     borderColor="gray.200"
-    borderTopWidth={1}
+    borderBottomWidth={1}
     borderRightWidth={1}
     textAlign="right"
     p="1"
