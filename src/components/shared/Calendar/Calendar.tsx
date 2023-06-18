@@ -233,7 +233,7 @@ export const Calendar: React.FC = () => {
                       "calendar"`}
       gridTemplateRows={"60px 1fr"}
       gridTemplateColumns={"1fr"}
-      h="100vh"
+      h="100dvh"
       overflowY="hidden"
       gap="1"
       color="blackAlpha.700"
