@@ -38,6 +38,7 @@ export const EmptySlotCard: React.FC<EmptySlotCardProps> = (
       bgColor={"orange.100"}
       onClick={props.onClick}
       borderRadius={0}
+      opacity={0.5}
     >
       {props.isSelected && (
         <Skeleton

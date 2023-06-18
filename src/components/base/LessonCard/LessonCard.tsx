@@ -16,8 +16,11 @@ const colorsMap: Record<COACHES, string> = {
 export type LessonCardProps = {
   label?: string;
   coaches: COACHES[];
+  orderedCoaches?: COACHES[];
   position: Position;
   lessonType?: LESSON_TYPES;
+  isFloating?: boolean;
+  selectedCoaches?: COACHES[];
 };
 
 export const LessonCard: React.FC<LessonCardProps> = (
@@ -27,10 +30,33 @@ export const LessonCard: React.FC<LessonCardProps> = (
   const width = props.position.w * maxWidth;
   const top = props.position.y * minHeight;
   const left = props.position.x * maxWidth;
-  const colors =
-    props.coaches.length && props.lessonType !== LESSON_TYPES.OTHER
-      ? props.coaches.map((coach) => colorsMap[coach])
-      : [colorsMap[COACHES.Empty]];
+
+  const getColors = () => {
+    const coaches = !!props.orderedCoaches?.length
+      ? props.orderedCoaches
+      : props.coaches;
+
+    let colors = [colorsMap[COACHES.Empty]];
+
+    if (coaches.length && props.lessonType !== LESSON_TYPES.OTHER) {
+      colors = coaches.map((coach) => {
+        const isSelected =
+          !props.selectedCoaches?.length ||
+          props.selectedCoaches.find((c) => c === coach);
+
+        return isSelected ? colorsMap[coach] : colorsMap[COACHES.Empty];
+      });
+    }
+
+    if (props.isFloating) {
+      colors.push(...colors);
+      colors.push(...colors);
+    }
+
+    return colors;
+  };
+
+  const colors = getColors();
 
   return (
     <Card
@@ -43,7 +69,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
       overflow="hidden"
       variant={"outline"}
     >
-      <VStack h="100%" w="5px" spacing={0}>
+      <VStack h="100%" w="5px" minW="5px" spacing={0}>
         {colors.map((bgColor) => (
           <Box w="100%" h={`${100 / colors.length}%`} bgColor={bgColor} />
         ))}
