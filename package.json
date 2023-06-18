@@ -38,7 +38,8 @@
     "build": "react-scripts build",
     "test": "jest",
     "eject": "react-scripts eject",
-    "generate-api-types": "sh generate-api-types.sh && prettier --write  'src/types/api-types/*.*ts'"
+    "generate-api-types": "sh generate-api-types.sh && prettier --write  'src/types/api-types/*.*ts'",
+    "prod": "node app.js"
   },
   "eslintConfig": {
     "extends": "react-app"
