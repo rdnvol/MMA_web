@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import {
   HStack,
@@ -9,6 +9,7 @@ import {
   Flex,
   Grid,
   GridItem,
+  useMediaQuery,
 } from "@chakra-ui/react";
 
 import {
@@ -24,6 +25,7 @@ import {
   getEventsByDateFromLessons,
   groupLessonsByDate,
   getEventsByDate,
+  DATE_FORMAT,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -36,11 +38,11 @@ import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
-import CalendarFilter from "./CalendarFilter";
+import CalendarControl from "./CalendarControl";
 import { useGetLessonsQuery } from "../../../services/lessons";
+import { useSearchParams } from "react-router-dom";
 
 const cakraHeight = 10;
-const cakraWidth = 40;
 
 type FiltersParams = {
   coaches: COACHES[];
@@ -55,17 +57,21 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
+  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
+  const cakraWidth = isLargerThan600 ? 40 : 20;
+
   // const { data: lessonsData } = useGetLessonsQuery("");
 
   // const groupedLessons = groupLessonsByDate(lessonsData || []);
 
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
+  const [searchParams] = useSearchParams();
 
-  const search = (searchFilters: { coaches: string[] }) => {
-    setFilters({
-      coaches: searchFilters.coaches as COACHES[],
-    });
-  };
+  useEffect(() => {
+    const coaches = searchParams.getAll("coaches") as COACHES[];
+
+    setFilters({ coaches });
+  }, [searchParams]);
 
   const renderHeader = (header: string | Date) => (
     <Flex h={cakraHeight} alignItems="center" gap={2}>
@@ -197,7 +203,7 @@ export const Calendar: React.FC = () => {
       id: nanoid(8),
       lessonType: selectedLessonType,
       participants: [],
-      date: format(selectedFreeSlot.date, "yyyy-MM-dd"),
+      date: format(selectedFreeSlot.date, DATE_FORMAT),
       startTime: minutesToTime(selectedFreeSlot.startTime),
       endTime: minutesToTime(selectedFreeSlot.endTime),
       label,
@@ -214,38 +220,43 @@ export const Calendar: React.FC = () => {
 
   return (
     <Grid
-      templateAreas={`"nav calendar form"`}
-      gridTemplateRows={"1fr"}
-      gridTemplateColumns={"150px 1fr 300px"}
+      templateAreas={`"control control"
+                      "time calendar"`}
+      gridTemplateRows={"60px 1fr"}
+      gridTemplateColumns={"50px 1fr"}
       h="100vh"
       overflowY="hidden"
       gap="1"
       color="blackAlpha.700"
     >
-      <GridItem pl="2" area={"nav"} boxShadow="md">
-        <CalendarFilter onSearch={search} />
+      <GridItem pl="2" area={"control"} boxShadow="md" overflow="hidden">
+        <CalendarControl />
       </GridItem>
-      <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
+
+      <GridItem area="time" boxShadow="md">
+        <VStack spacing={0} divider={<StackDivider borderColor="gray.200" />}>
+          {renderHeader("Time")}
+          {timeData.map(renderTime)}
+        </VStack>
+      </GridItem>
+
+      <GridItem area={"calendar"} overflowX="scroll" h="100%">
         <HStack
           spacing={0}
           divider={<StackDivider borderColor="gray.200" />}
           alignItems="flex-start"
+          h="100%"
         >
-          <VStack spacing={0} divider={<StackDivider borderColor="gray.200" />}>
-            {renderHeader("Time")}
-            {timeData.map(renderTime)}
-          </VStack>
           {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
-      <GridItem pl="2" area={"form"} boxShadow="md">
-        <CreateLessonForm
-          selectedFreeSlot={selectedFreeSlot}
-          onShowFreeSlots={showFreeSlots}
-          onSubmit={submitCreateLesson}
-          onCancel={cancelCreateLesson}
-        />
-      </GridItem>
+
+      <CreateLessonForm
+        selectedFreeSlot={selectedFreeSlot}
+        onShowFreeSlots={showFreeSlots}
+        onSubmit={submitCreateLesson}
+        onCancel={cancelCreateLesson}
+      />
     </Grid>
   );
 };
