@@ -1,4 +1,9 @@
-import { Coaches, Event, PositionedEvent } from "../constants/data";
+import {
+  COACHES,
+  Event,
+  PositionedEvent,
+  slotDuration,
+} from "../constants/data";
 
 export type Calendar = Meeting[];
 export type Meeting = [number, number];
@@ -128,10 +133,12 @@ export function getPositionedEvents(
     for (const event of eventsLine) {
       positionedEvents.push({
         ...event,
-        x: index / eventsLines.length,
-        y: (event.startTime - dailyBounds[0]) / slotDuration,
-        w: 1 / eventsLines.length,
-        h: (event.endTime - event.startTime) / slotDuration,
+        position: {
+          x: index / eventsLines.length,
+          y: (event.startTime - dailyBounds[0]) / slotDuration,
+          w: 1 / eventsLines.length,
+          h: (event.endTime - event.startTime) / slotDuration,
+        },
       });
     }
   });
@@ -142,11 +149,13 @@ export function getPositionedEvents(
 export function getFreeSlots(
   events: Event[],
   dailyBounds: [number, number],
-  slotDuration: number,
-  coach?: Coaches
+  duration: number,
+  coaches?: COACHES[]
 ): PositionedEvent[] {
-  const filteredEvents = coach
-    ? events.filter((event: Event) => event.coach == coach)
+  const filteredEvents = coaches?.length
+    ? events.filter((event: Event) =>
+        event.coaches.some((coach) => coaches.includes(coach))
+      )
     : events;
 
   const calendar: Calendar = filteredEvents.map((event: Event) => [
@@ -156,15 +165,18 @@ export function getFreeSlots(
 
   const fulfilledCalendar = getFulfilledCalendar(calendar, dailyBounds);
   const flattenCalendar = getFlattenCalendar(fulfilledCalendar);
-  const freeCalendar = getMatchingAvailabilities(flattenCalendar, slotDuration);
+  const freeCalendar = getMatchingAvailabilities(flattenCalendar, duration);
 
   return freeCalendar.map((meeting: Meeting) => ({
-    coach: Coaches.Empty,
+    id: "free-item",
+    coaches: [],
     startTime: meeting[0],
     endTime: meeting[1],
-    x: 0,
-    y: (meeting[0] - dailyBounds[0]) / slotDuration,
-    w: 1,
-    h: (meeting[1] - meeting[0]) / slotDuration,
+    position: {
+      x: 0,
+      y: (meeting[0] - dailyBounds[0]) / slotDuration,
+      w: 1,
+      h: (meeting[1] - meeting[0]) / slotDuration,
+    },
   }));
 }
