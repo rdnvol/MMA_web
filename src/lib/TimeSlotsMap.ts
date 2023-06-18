@@ -1,5 +1,5 @@
 import { slotDuration, Event, COACHES } from "../constants/data";
-import { LessonType } from "../models";
+import { BUSY_LEVELS, LessonType } from "../models";
 import TimeSlot from "./TimeSlot";
 
 export default class TimeSlotsMap {
@@ -23,7 +23,7 @@ export default class TimeSlotsMap {
     let time = bounds[0];
 
     while (time + duration <= bounds[1]) {
-      timeSlotsMap[time] = new TimeSlot(time, duration);
+      timeSlotsMap[time] = new TimeSlot(time, duration, this);
       time += slotDuration;
     }
 
@@ -44,16 +44,16 @@ export default class TimeSlotsMap {
     return timeSlots;
   }
 
-  _getTimeSlot(time: number): TimeSlot | undefined {
+  getTimeSlot(time: number): TimeSlot | undefined {
     return this.timeSlots[time];
   }
 
-  _getNextTimeSlot(current: number): TimeSlot | undefined {
-    return this._getTimeSlot(current + slotDuration);
+  getNextTimeSlot(current: number): TimeSlot | undefined {
+    return this.getTimeSlot(current + slotDuration);
   }
 
-  _getPrevTimeSlot(current: number): TimeSlot | undefined {
-    return this._getTimeSlot(current - slotDuration);
+  getPrevTimeSlot(current: number): TimeSlot | undefined {
+    return this.getTimeSlot(current - slotDuration);
   }
 
   getAvailableTimeSlots(lessonType: LessonType): TimeSlot[] {
@@ -63,40 +63,21 @@ export default class TimeSlotsMap {
       (coach) => coach.name as COACHES
     );
     const isFloating = lessonType.coaches.length > 1;
+    const isHalfTime = lessonType.coachBusyLevel === BUSY_LEVELS.HALF;
 
     for (const timeSlot of Object.values(this.timeSlots)) {
-      const time = timeSlot.startTime;
       let isAvailable = true;
 
-      if (
-        isFloating &&
-        (coaches.some(
-          (coach: COACHES) => timeSlot.getCoachBusiness(coach) >= 2
-        ) ||
-          coaches.every((coach: COACHES) => {
-            const prev = this._getPrevTimeSlot(time);
-
-            if (prev && prev.getCoachBusiness(coach) > 1) {
-              return true;
-            }
-
-            const next = this._getNextTimeSlot(time);
-
-            if (next && next.getCoachBusiness(coach) > 1) {
-              return true;
-            }
-
-            return false;
-          }))
-      ) {
-        isAvailable = false;
+      if (isFloating) {
+        isAvailable = timeSlot.getFloatingAvailability(coaches);
       }
 
-      if (
-        !isFloating &&
-        coaches.some((coach: COACHES) => timeSlot.getCoachBusiness(coach) >= 1)
-      ) {
-        isAvailable = false;
+      if (!isFloating && isHalfTime) {
+        isAvailable = timeSlot.getHalfTimeAvailability(coaches);
+      }
+
+      if (!isFloating && !isHalfTime) {
+        isAvailable = timeSlot.getFullTimeAvailability(coaches);
       }
 
       if (isAvailable) {
@@ -115,7 +96,7 @@ export default class TimeSlotsMap {
 
       let time = event.startTime;
       const isFloating = event.isFloating;
-      const lessonType = event.lessonType;
+      const isHalfTime = event.isHalfTime;
 
       while (time < event.endTime) {
         const timeSlotsKeys = this._getMatchingTimeSlots(time);
@@ -125,19 +106,19 @@ export default class TimeSlotsMap {
           const coach = event.orderedCoaches[index];
 
           timeSlotsKeys.forEach((key) => {
-            this._getTimeSlot(key)?.addCoachBusiness(
+            this.getTimeSlot(key)?.addCoachBusiness(
               coach,
-              lessonType,
-              !!isFloating
+              !!isFloating,
+              !!isHalfTime
             );
           });
         } else {
           for (const coach of event.coaches) {
             timeSlotsKeys.forEach((key) => {
-              this._getTimeSlot(key)?.addCoachBusiness(
+              this.getTimeSlot(key)?.addCoachBusiness(
                 coach,
-                lessonType,
-                !!isFloating
+                !!isFloating,
+                !!isHalfTime
               );
             });
           }

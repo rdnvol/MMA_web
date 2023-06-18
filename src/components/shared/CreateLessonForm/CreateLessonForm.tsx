@@ -6,6 +6,9 @@ import {
   VStack,
   Heading,
   Input,
+  Flex,
+  Tag,
+  TagLabel,
 } from "@chakra-ui/react";
 import { COACHES, coachesData, Event } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
@@ -19,9 +22,14 @@ const lessonOptions: LESSON_TYPES[] = [
   LESSON_TYPES.SPLIT,
   LESSON_TYPES.GROUP,
   LESSON_TYPES.MASSAGE,
+  LESSON_TYPES.OTHER,
+];
+const singleCoachLessonTypes: LESSON_TYPES[] = [
+  LESSON_TYPES.SPLIT,
+  LESSON_TYPES.MASSAGE,
 ];
 const coachesOptions = coachesData.map((coach) => coach.name);
-const durationOptions = ["30", "60", "90"];
+const durationOptions = ["30", "60"];
 
 const colorScheme = "orange";
 
@@ -42,7 +50,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [selectedLessonType, setSelectedLessonType] = useState<string>(
+  const [selectedLessonType, setSelectedLessonType] = useState<LESSON_TYPES>(
     lessonOptions[0]
   );
   const [selectedCoaches, setSelectedCoaches] = useState<COACHES[]>([]);
@@ -53,7 +61,18 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [label, setLabel] = useState<string>("");
 
   const changeSelectedCoaches = (value: string[]) => {
+    if (
+      singleCoachLessonTypes.includes(selectedLessonType) &&
+      value.length > 1
+    ) {
+      return;
+    }
+
     setSelectedCoaches(value as COACHES[]);
+  };
+
+  const changeSelectedLessonType = (value: string) => {
+    setSelectedLessonType(value as LESSON_TYPES);
   };
 
   const showFreeSlots = (e: any) => {
@@ -84,35 +103,37 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   };
 
   return (
-    <form onSubmit={submitForm} onReset={resetForm}>
-      <VStack
-        w="300px"
-        paddingX={5}
-        alignItems="flex-start"
-        spacing={4}
-        overflow="hidden"
+    <form onSubmit={submitForm} onReset={resetForm} style={{ height: "100%" }}>
+      <Flex
+        flexDirection="column"
+        justifyContent="space-between"
+        h="full"
+        padding={5}
       >
-        <Heading size="md">Book lesson</Heading>
-        <FormControl>
-          <FormLabel>Lesson type</FormLabel>
-          <RadioGroup
-            options={lessonOptions}
-            value={selectedLessonType}
-            onChange={setSelectedLessonType}
-            colorScheme={colorScheme}
-          />
-        </FormControl>
+        <VStack alignItems="flex-start" spacing={4} overflow="hidden">
+          <Heading size="md">Book lesson</Heading>
+          <FormControl>
+            <FormLabel>Type</FormLabel>
+            <RadioGroup
+              options={lessonOptions}
+              value={selectedLessonType}
+              onChange={changeSelectedLessonType}
+              colorScheme={colorScheme}
+              isDisabled={areFreeSlotsRequested}
+            />
+          </FormControl>
 
-        <FormControl>
-          <FormLabel>Coaches</FormLabel>
-          <CheckboxGroup
-            options={coachesOptions}
-            value={selectedCoaches}
-            onChange={changeSelectedCoaches}
-            colorScheme={colorScheme}
-          />
-        </FormControl>
-        <FormControl>
+          <FormControl>
+            <FormLabel>Coaches</FormLabel>
+            <CheckboxGroup
+              options={coachesOptions}
+              value={selectedCoaches}
+              onChange={changeSelectedCoaches}
+              colorScheme={colorScheme}
+              isDisabled={areFreeSlotsRequested}
+            />
+          </FormControl>
+          {/* <FormControl>
           <FormLabel>Duration</FormLabel>
           <RadioGroup
             options={durationOptions}
@@ -120,48 +141,61 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             onChange={setSelectedDuration}
             colorScheme={colorScheme}
           />
-        </FormControl>
-        <Button
-          colorScheme={colorScheme}
-          type="button"
-          onClick={showFreeSlots}
-          isDisabled={areFreeSlotsRequested || selectedCoaches.length === 0}
-        >
-          Show free slots
-        </Button>
+        </FormControl> */}
+          <Button
+            colorScheme={colorScheme}
+            type="button"
+            onClick={showFreeSlots}
+            isDisabled={areFreeSlotsRequested || selectedCoaches.length === 0}
+            w="full"
+          >
+            Show free slots
+          </Button>
 
-        <FormControl>
+          {selectedFreeSlot && (
+            <FormControl>
+              <FormLabel>Name</FormLabel>
+              <Input
+                value={label}
+                onChange={(evt) => setLabel(evt.target.value)}
+                autoFocus
+                colorScheme={colorScheme}
+              />
+            </FormControl>
+          )}
+        </VStack>
+
+        <VStack alignItems="flex-start">
+          <Flex width="full" justifyContent="flex-start" gap={2}>
+            {selectedFreeSlot && `${selectedCoaches.join(", ")}`}
+            {selectedFreeSlot && (
+              <Tag size="sm" variant="outline" colorScheme={colorScheme}>
+                <TagLabel>{selectedLessonType}</TagLabel>
+              </Tag>
+            )}
+          </Flex>
+
           <FormLabel>
             {selectedFreeSlot &&
-              `${format(selectedFreeSlot.date, "E dd")}: ${minutesToTime(
+              `${format(selectedFreeSlot.date, "E dd")}, ${minutesToTime(
                 selectedFreeSlot.startTime
               )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
           </FormLabel>
-        </FormControl>
 
-        {selectedFreeSlot && (
-          <FormControl>
-            <FormLabel>Participants</FormLabel>
-            <Input
-              value={label}
-              onChange={(evt) => setLabel(evt.target.value)}
-              autoFocus
+          <Flex width="full" justifyContent="space-between">
+            <Button
               colorScheme={colorScheme}
-            />
-          </FormControl>
-        )}
-
-        <Button
-          colorScheme={colorScheme}
-          type="submit"
-          isDisabled={!selectedFreeSlot}
-        >
-          Book lesson
-        </Button>
-        <Button colorScheme={"gray"} type="reset">
-          Cancel
-        </Button>
-      </VStack>
+              type="submit"
+              isDisabled={!selectedFreeSlot}
+            >
+              Book lesson
+            </Button>
+            <Button colorScheme={"gray"} type="reset">
+              Cancel
+            </Button>
+          </Flex>
+        </VStack>
+      </Flex>
     </form>
   );
 };

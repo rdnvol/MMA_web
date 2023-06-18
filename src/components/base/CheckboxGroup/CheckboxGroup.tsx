@@ -31,10 +31,16 @@ const CheckboxCard: React.FC<CheckboxCardProps> = (
         borderWidth="1px"
         borderRadius="md"
         boxShadow="md"
+        _disabled={{
+          color: "gray.300",
+          cursor: "not-allowed",
+          bg: "gray.100",
+          borderColor: `gray.100`,
+        }}
         _checked={{
-          bg: `${colorScheme}.600`,
+          bg: `${colorScheme}.500`,
           color: "white",
-          borderColor: `${colorScheme}.600`,
+          borderColor: `${colorScheme}.500`,
         }}
         px={5}
         py={3}
@@ -46,10 +52,11 @@ const CheckboxCard: React.FC<CheckboxCardProps> = (
 };
 
 export type RadioGroupProps = {
-  options: string[] | { value: string; colorScheme: string }[];
+  options: string[] | { value: string; label?: string; colorScheme?: string }[];
   value?: string[];
   onChange?: (value: string[]) => void;
   colorScheme?: string;
+  isDisabled?: boolean;
 };
 
 export const CheckboxGroup: React.FC<RadioGroupProps> = (
@@ -58,11 +65,14 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
   const { getCheckboxProps } = useCheckboxGroup({
     value: props.value,
     onChange: props.onChange,
+    isDisabled: props.isDisabled,
   });
 
   return (
     <Flex gap={2} direction="row" flexWrap="wrap">
       {props.options.map((option) => {
+        const label =
+          typeof option === "string" ? option : option.label || option.value;
         const value = typeof option === "string" ? option : option.value;
         const colorScheme =
           typeof option === "string" ? props.colorScheme : option.colorScheme;
@@ -70,8 +80,13 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
         const checkbox = getCheckboxProps({ value });
 
         return (
-          <CheckboxCard key={value} {...checkbox} colorScheme={colorScheme}>
-            {value}
+          <CheckboxCard
+            key={value}
+            {...checkbox}
+            colorScheme={colorScheme}
+            isDisabled={props.isDisabled}
+          >
+            {label}
           </CheckboxCard>
         );
       })}

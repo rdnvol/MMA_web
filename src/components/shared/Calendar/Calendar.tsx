@@ -14,7 +14,6 @@ import {
 import {
   currentWeek,
   timeData,
-  getEventsByDate,
   PositionedEvent,
   dailyBounds,
   slotDuration,
@@ -22,6 +21,9 @@ import {
   lessonTypesData,
   addLesson,
   updateCoachesOrder,
+  getEventsByDateFromLessons,
+  groupLessonsByDate,
+  getEventsByDate,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -34,10 +36,15 @@ import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
-import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
+import CalendarFilter from "./CalendarFilter";
+import { useGetLessonsQuery } from "../../../services/lessons";
 
 const cakraHeight = 10;
 const cakraWidth = 40;
+
+type FiltersParams = {
+  coaches: COACHES[];
+};
 
 export const Calendar: React.FC = () => {
   const [selectedLessonType, setSelectedLessonType] = useState<
@@ -48,10 +55,16 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
-  const [selectedCoaches, setSelectedCoaches] = useState<COACHES[]>([]);
+  // const { data: lessonsData } = useGetLessonsQuery("");
 
-  const changeSelectedCoaches = (value: string[]) => {
-    setSelectedCoaches(value as COACHES[]);
+  // const groupedLessons = groupLessonsByDate(lessonsData || []);
+
+  const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
+
+  const search = (searchFilters: { coaches: string[] }) => {
+    setFilters({
+      coaches: searchFilters.coaches as COACHES[],
+    });
   };
 
   const renderHeader = (header: string | Date) => (
@@ -73,30 +86,30 @@ export const Calendar: React.FC = () => {
     </Flex>
   );
 
-  const renderTime = (data: string = "") => (
-    <Box key={data} w="50px" h={cakraHeight}>
-      {data}
+  const renderTime = (time: string = "") => (
+    <Box key={time} w="50px" h={cakraHeight}>
+      {time}
     </Box>
   );
 
   const renderDateColumn = (date: Date) => {
+    // const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
     const eventsByDate = getEventsByDate(date);
-    const filteredEvents = filterEventsByCoaches(eventsByDate, selectedCoaches);
+    const filteredEvents = filterEventsByCoaches(eventsByDate, filters.coaches);
     const positionedEvents = getPositionedEvents(
       filteredEvents,
       dailyBounds,
       slotDuration
     );
-    const freeSlots =
-      selectedLessonType && date.getDate() === 20
-        ? getFreeSlots(
-            eventsByDate,
-            selectedLessonType,
-            selectedDuration,
-            date,
-            dailyBounds
-          )
-        : [];
+    const freeSlots = selectedLessonType
+      ? getFreeSlots(
+          eventsByDate,
+          selectedLessonType,
+          selectedDuration,
+          date,
+          dailyBounds
+        )
+      : [];
 
     return (
       <VStack key={date.toDateString()} spacing={0}>
@@ -116,13 +129,14 @@ export const Calendar: React.FC = () => {
   const renderLesson = (positionedEvent: PositionedEvent) => {
     return (
       <LessonCard
+        key={positionedEvent.id}
         position={positionedEvent.position}
         coaches={positionedEvent.coaches}
         label={positionedEvent.label}
         lessonType={positionedEvent.lessonType}
         isFloating={positionedEvent.isFloating}
         orderedCoaches={positionedEvent.orderedCoaches}
-        selectedCoaches={selectedCoaches}
+        selectedCoaches={filters.coaches}
       />
     );
   };
@@ -208,15 +222,8 @@ export const Calendar: React.FC = () => {
       gap="1"
       color="blackAlpha.700"
     >
-      <GridItem pl="2" area={"nav"}>
-        <CheckboxGroup
-          options={[
-            { value: COACHES.Sasha, colorScheme: "red" },
-            { value: COACHES.Vika, colorScheme: "green" },
-          ]}
-          value={selectedCoaches}
-          onChange={changeSelectedCoaches}
-        />
+      <GridItem pl="2" area={"nav"} boxShadow="md">
+        <CalendarFilter onSearch={search} />
       </GridItem>
       <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
         <HStack
@@ -231,7 +238,7 @@ export const Calendar: React.FC = () => {
           {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
-      <GridItem pl="2" area={"form"}>
+      <GridItem pl="2" area={"form"} boxShadow="md">
         <CreateLessonForm
           selectedFreeSlot={selectedFreeSlot}
           onShowFreeSlots={showFreeSlots}

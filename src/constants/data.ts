@@ -14,12 +14,13 @@ import {
 } from "../utils/calendar";
 
 export const DATE_FORMAT = "yyyy-MM-dd";
+export const TIME_FORMAT = "hh:mm";
 export const today = new Date();
 export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
 export const dailyBounds: [number, number] = [
   timeToMinutes("8:00"),
-  timeToMinutes("18:00"),
+  timeToMinutes("21:00"),
 ];
 export const slotsNumber = (dailyBounds[1] - dailyBounds[0]) / slotDuration;
 export const timeData = Array.from({ length: slotsNumber }, (v, i) =>
@@ -41,6 +42,7 @@ export type Event = {
   lessonType?: LESSON_TYPES;
   label?: string;
   isFloating?: boolean;
+  isHalfTime?: boolean;
   orderedCoaches?: COACHES[];
 };
 
@@ -231,18 +233,18 @@ const lessonsData: Lesson[] = [
   //   startTime: "12:00",
   //   endTime: "13:30",
   // },
-  // {
-  //   id: "mon-5",
-  //   lessonType: lessonTypesData[6],
-  //   participants: [participantsData[4]],
-  //   date: format(currentWeek[1], DATE_FORMAT),
-  //   startTime: "9:00",
-  //   endTime: "10:00",
-  //   // orderedCoaches: [coachesData[0], coachesData[1]],
-  // },
+  {
+    id: "mon-5",
+    lessonType: lessonTypesData[2],
+    participants: [participantsData[5]],
+    date: format(currentWeek[1], DATE_FORMAT),
+    startTime: "8:30",
+    endTime: "9:30",
+    // orderedCoaches: [coachesData[0], coachesData[1]],
+  },
   {
     id: "mon-6",
-    lessonType: lessonTypesData[6],
+    lessonType: lessonTypesData[2],
     participants: [participantsData[4]],
     date: format(currentWeek[1], DATE_FORMAT),
     startTime: "9:00",
@@ -290,7 +292,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "wed-2",
-    lessonType: lessonTypesData[8],
+    lessonType: lessonTypesData[5],
     participants: [participantsData[2], participantsData[3]],
     date: format(currentWeek[3], DATE_FORMAT),
     startTime: "9:00",
@@ -349,7 +351,7 @@ const lessonsData: Lesson[] = [
     lessonType: lessonTypesData[5],
     participants: [participantsData[2]],
     date: format(currentWeek[3], DATE_FORMAT),
-    startTime: "10:00",
+    startTime: "10:30",
     endTime: "11:30",
   },
   {
@@ -362,7 +364,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "thu-2",
-    lessonType: lessonTypesData[5],
+    lessonType: lessonTypesData[2],
     participants: [participantsData[4]],
     date: format(currentWeek[4], DATE_FORMAT),
     startTime: "10:00",
@@ -370,7 +372,7 @@ const lessonsData: Lesson[] = [
   },
   {
     id: "thu-3",
-    lessonType: lessonTypesData[8],
+    lessonType: lessonTypesData[3],
     participants: [participantsData[3], participantsData[2]],
     date: format(currentWeek[4], DATE_FORMAT),
     startTime: "10:00",
@@ -440,6 +442,7 @@ export function dumpLessonToEvent(lesson: Lesson): Event {
     lessonType: lesson.lessonType.type,
     isFloating:
       lesson.lessonType.coaches.length > 1 && !lesson.orderedCoaches?.length,
+    isHalfTime: lesson.lessonType.coachBusyLevel === BUSY_LEVELS.HALF,
     orderedCoaches: lesson.orderedCoaches?.map(
       (coach) => coach.name as COACHES
     ),
@@ -450,6 +453,15 @@ export function getEventsByDate(date: Date): Event[] {
   const formattedDate = format(date, DATE_FORMAT);
 
   return (calendarData[formattedDate] || []).map(dumpLessonToEvent);
+}
+
+export function getEventsByDateFromLessons(
+  date: Date,
+  lessons: Record<string, Lesson[]>
+) {
+  const formattedDate = format(date, DATE_FORMAT);
+
+  return (lessons[formattedDate] || []).map(dumpLessonToEvent);
 }
 
 export function addLesson(lesson: Lesson) {
@@ -528,7 +540,9 @@ export function updateCoachesOrder(
   refreshCalendarData();
 }
 
-function groupLessonsByDate(lessons: Lesson[]): Record<string, Lesson[]> {
+export function groupLessonsByDate(
+  lessons: Lesson[]
+): Record<string, Lesson[]> {
   const map: Record<string, Lesson[]> = {};
 
   for (const lesson of lessons) {
