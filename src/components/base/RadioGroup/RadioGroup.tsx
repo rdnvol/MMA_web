@@ -1,6 +1,6 @@
 import {
   Box,
-  HStack,
+  Flex,
   useRadio,
   useRadioGroup,
   UseRadioProps,
@@ -62,7 +62,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = (
   const group = getRootProps();
 
   return (
-    <HStack {...group}>
+    <Flex {...group} gap={2} direction="row" flexWrap="wrap">
       {props.options.map((value) => {
         const radio = getRadioProps({ value });
 
@@ -72,6 +72,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = (
           </RadioCard>
         );
       })}
-    </HStack>
+    </Flex>
   );
 };
+
+export default RadioGroup;

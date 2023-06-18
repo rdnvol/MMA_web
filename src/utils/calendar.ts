@@ -1,3 +1,4 @@
+import { addDays, getWeek, subDays } from "date-fns";
 import {
   COACHES,
   Event,
@@ -9,6 +10,29 @@ export type Calendar = Meeting[];
 export type Meeting = [number, number];
 
 type EventsLine = Event[];
+
+export function getCurrentWeek(today: Date) {
+  const week = getWeek(today);
+
+  let currentWeek = [];
+
+  let minDayOfWeek = today;
+  let maxDayOfWeek = today;
+
+  while (week === getWeek(minDayOfWeek)) {
+    currentWeek.unshift(minDayOfWeek);
+    minDayOfWeek = subDays(minDayOfWeek, 1);
+  }
+
+  while (week === getWeek(maxDayOfWeek)) {
+    currentWeek.push(maxDayOfWeek);
+    maxDayOfWeek = addDays(maxDayOfWeek, 1);
+  }
+
+  currentWeek = currentWeek.slice(1);
+
+  return currentWeek;
+}
 
 export function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":");
@@ -150,6 +174,7 @@ export function getFreeSlots(
   events: Event[],
   dailyBounds: [number, number],
   duration: number,
+  date: Date,
   coaches?: COACHES[]
 ): PositionedEvent[] {
   const filteredEvents = coaches?.length
@@ -167,9 +192,25 @@ export function getFreeSlots(
   const flattenCalendar = getFlattenCalendar(fulfilledCalendar);
   const freeCalendar = getMatchingAvailabilities(flattenCalendar, duration);
 
-  return freeCalendar.map((meeting: Meeting) => ({
+  const freeSlots: Meeting[] = [];
+
+  for (const meeting of freeCalendar) {
+    let currentMeeting: Meeting = [meeting[0], meeting[0] + duration];
+
+    while (currentMeeting[1] <= meeting[1]) {
+      freeSlots.push(currentMeeting);
+
+      currentMeeting = [
+        currentMeeting[0] + slotDuration,
+        currentMeeting[1] + slotDuration,
+      ];
+    }
+  }
+
+  return freeSlots.map((meeting: Meeting) => ({
     id: "free-item",
     coaches: [],
+    date,
     startTime: meeting[0],
     endTime: meeting[1],
     position: {

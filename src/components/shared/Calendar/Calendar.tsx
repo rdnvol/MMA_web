@@ -1,33 +1,64 @@
 import React, { useState } from "react";
-import { HStack, Box, StackDivider, VStack } from "@chakra-ui/react";
+import {
+  HStack,
+  Box,
+  StackDivider,
+  VStack,
+  Circle,
+  Flex,
+} from "@chakra-ui/react";
 
 import {
-  weekdays,
+  currentWeek,
   timeData,
-  events,
+  getEventsByDate,
   PositionedEvent,
   dailyBounds,
   slotDuration,
   COACHES,
   lessonTypesData,
+  addLesson,
 } from "../../../constants/data";
-import { getPositionedEvents, getFreeSlots } from "../../../utils/calendar";
+import {
+  getPositionedEvents,
+  getFreeSlots,
+  minutesToTime,
+} from "../../../utils/calendar";
 import CreateLessonForm from "../CreateLessonForm";
 import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
+import { format, isToday } from "date-fns";
+import EmptySlotCard from "../../base/EmptySlotCard";
 
 const cakraHeight = 10;
 const cakraWidth = 40;
 
 export const Calendar: React.FC = () => {
-  const [selectedLessonType, setSelectedLessonType] =
-    useState<LessonType | null>(null);
+  const [selectedLessonType, setSelectedLessonType] = useState<
+    LessonType | undefined
+  >();
   const [selectedDuration, setSelectedDuration] = useState<number>(0);
+  const [selectedFreeSlot, setSelectedFreeSlot] = useState<
+    PositionedEvent | undefined
+  >();
 
-  const renderHeader = (header: string) => (
-    <Box w="50px" h={cakraHeight}>
-      {header}
-    </Box>
+  const renderHeader = (header: string | Date) => (
+    <Flex h={cakraHeight} alignItems="center" gap={2}>
+      {typeof header === "string" ? (
+        header
+      ) : (
+        <>
+          {format(header, "E")}
+          <Circle
+            size="28px"
+            bg={isToday(header) ? "orange.600" : ""}
+            color={isToday(header) ? "white" : ""}
+          >
+            {format(header, "dd")}
+          </Circle>
+        </>
+      )}
+    </Flex>
   );
 
   const renderTime = (data: string = "") => (
@@ -36,12 +67,27 @@ export const Calendar: React.FC = () => {
     </Box>
   );
 
-  const renderEvent = (positionedEvent: PositionedEvent) => {
+  const renderLesson = (positionedEvent: PositionedEvent) => {
     return (
       <LessonCard
         position={positionedEvent.position}
         coaches={positionedEvent.coaches}
         lessonType={positionedEvent.lessonType}
+      />
+    );
+  };
+
+  const renderEmptySlot = (positionedEvent: PositionedEvent) => {
+    return (
+      <EmptySlotCard
+        position={positionedEvent.position}
+        onClick={() => {
+          setSelectedFreeSlot(positionedEvent);
+        }}
+        isSelected={
+          selectedFreeSlot?.date === positionedEvent.date &&
+          selectedFreeSlot?.startTime === positionedEvent.startTime
+        }
       />
     );
   };
@@ -60,7 +106,31 @@ export const Calendar: React.FC = () => {
     if (type) {
       setSelectedLessonType(type);
       setSelectedDuration(duration);
+      setSelectedFreeSlot(undefined);
     }
+  };
+
+  const submitCreateLesson = () => {
+    if (!selectedFreeSlot || !selectedLessonType) {
+      return;
+    }
+
+    addLesson({
+      id: "some-id",
+      lessonType: selectedLessonType,
+      participants: [],
+      date: format(selectedFreeSlot.date, "yyyy-MM-dd"),
+      startTime: minutesToTime(selectedFreeSlot.startTime),
+      endTime: minutesToTime(selectedFreeSlot.endTime),
+    });
+
+    cancelCreateLesson();
+  };
+
+  const cancelCreateLesson = () => {
+    setSelectedLessonType(undefined);
+    setSelectedDuration(0);
+    setSelectedFreeSlot(undefined);
   };
 
   return (
@@ -69,36 +139,44 @@ export const Calendar: React.FC = () => {
       divider={<StackDivider borderColor="gray.200" />}
       alignItems="flex-start"
     >
-      <VStack spacing={0}>
+      <VStack spacing={0} position="relative">
         {renderHeader("Time")}
         {timeData.map(renderTime)}
       </VStack>
-      {weekdays.map((dayOfWeek) => (
-        <VStack key={dayOfWeek} spacing={0}>
-          {renderHeader(dayOfWeek)}
+      {currentWeek.map((date) => (
+        <VStack key={date.toDateString()} spacing={0}>
+          {renderHeader(date)}
           <Box
             position="relative"
             w={cakraWidth}
             h={cakraHeight * timeData.length}
           >
             {getPositionedEvents(
-              events[dayOfWeek] || [],
+              getEventsByDate(date),
               dailyBounds,
               slotDuration
-            ).map((event) => renderEvent(event))}
+            ).map((event) => renderLesson(event))}
             {selectedLessonType &&
               getFreeSlots(
-                events[dayOfWeek] || [],
+                getEventsByDate(date),
                 dailyBounds,
                 selectedDuration,
+                date,
                 (selectedLessonType.coaches || []).map(
                   (coach) => coach.name as COACHES
                 )
-              ).map((event) => renderEvent(event))}
+              ).map((event) => renderEmptySlot(event))}
           </Box>
         </VStack>
       ))}
-      {<CreateLessonForm onShowFreeSlots={showFreeSlots} />}
+      {
+        <CreateLessonForm
+          selectedFreeSlot={selectedFreeSlot}
+          onShowFreeSlots={showFreeSlots}
+          onSubmit={submitCreateLesson}
+          onCancel={cancelCreateLesson}
+        />
+      }
     </HStack>
   );
 };

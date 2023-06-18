@@ -1,6 +1,6 @@
 import {
   Box,
-  HStack,
+  Flex,
   useCheckbox,
   useCheckboxGroup,
   UseCheckboxProps,
@@ -61,7 +61,7 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
   });
 
   return (
-    <HStack>
+    <Flex gap={2} direction="row" flexWrap="wrap">
       {props.options.map((value) => {
         const checkbox = getCheckboxProps({ value });
 
@@ -75,6 +75,8 @@ export const CheckboxGroup: React.FC<RadioGroupProps> = (
           </CheckboxCard>
         );
       })}
-    </HStack>
+    </Flex>
   );
 };
+
+export default CheckboxGroup;

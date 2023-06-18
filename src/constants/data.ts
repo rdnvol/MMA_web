@@ -1,3 +1,4 @@
+import { format, parse } from "date-fns";
 import {
   BUSY_LEVELS,
   Coach,
@@ -5,9 +6,14 @@ import {
   LessonType,
   LESSON_TYPES,
 } from "../models";
-import { minutesToTime, timeToMinutes } from "../utils/calendar";
+import {
+  minutesToTime,
+  timeToMinutes,
+  getCurrentWeek,
+} from "../utils/calendar";
 
-export const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const today = new Date();
+export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
 export const dailyBounds: [number, number] = [
   timeToMinutes("8:00"),
@@ -23,6 +29,26 @@ export enum COACHES {
   Sasha = "Sasha",
   Empty = "",
 }
+
+export type Event = {
+  id: string;
+  date: Date;
+  startTime: number;
+  endTime: number;
+  coaches: COACHES[];
+  lessonType?: LESSON_TYPES;
+};
+
+export type EventsLine = Event[];
+
+export type Position = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+export type PositionedEvent = Event & { position: Position };
 
 export const coachesData: Coach[] = [
   { id: "sasha", email: "sasha@mma-app.com", name: "Sasha" },
@@ -86,133 +112,112 @@ export const lessonTypesData: LessonType[] = [
   },
 ];
 
-export type Event = {
-  id: string;
-  startTime: number;
-  endTime: number;
-  coaches: COACHES[];
-  lessonType?: LESSON_TYPES;
-};
+const lessonsData: Lesson[] = [
+  {
+    id: "mon-1",
+    lessonType: lessonTypesData[3],
+    participants: [],
+    date: "2023-02-27",
+    startTime: "8:30",
+    endTime: "9:00",
+  },
+  {
+    id: "mon-2",
+    lessonType: lessonTypesData[0],
+    participants: [],
+    date: "2023-02-27",
+    startTime: "10:00",
+    endTime: "11:00",
+  },
+  {
+    id: "mon-3",
+    lessonType: lessonTypesData[6],
+    participants: [],
+    date: "2023-02-27",
+    startTime: "11:30",
+    endTime: "13:00",
+  },
+  {
+    id: "tue-1",
+    lessonType: lessonTypesData[3],
+    participants: [],
+    date: "2023-02-28",
+    startTime: "8:30",
+    endTime: "9:00",
+  },
+  {
+    id: "tue-2",
+    lessonType: lessonTypesData[3],
+    participants: [],
+    date: "2023-02-28",
+    startTime: "10:30",
+    endTime: "11:30",
+  },
+  {
+    id: "tue-3",
+    lessonType: lessonTypesData[0],
+    participants: [],
+    date: "2023-02-28",
+    startTime: "11:00",
+    endTime: "12:00",
+  },
+  {
+    id: "tue-4",
+    lessonType: lessonTypesData[3],
+    participants: [],
+    date: "2023-02-28",
+    startTime: "11:30",
+    endTime: "13:00",
+  },
+  {
+    id: "wed-1",
+    lessonType: lessonTypesData[2],
+    participants: [],
+    date: "2023-03-01",
+    startTime: "8:30",
+    endTime: "9:30",
+  },
+  {
+    id: "wed-2",
+    lessonType: lessonTypesData[8],
+    participants: [],
+    date: "2023-03-01",
+    startTime: "9:00",
+    endTime: "10:00",
+  },
+  {
+    id: "wed-3",
+    lessonType: lessonTypesData[3],
+    participants: [],
+    date: "2023-03-01",
+    startTime: "8:00",
+    endTime: "9:00",
+  },
+  {
+    id: "wed-4",
+    lessonType: lessonTypesData[5],
+    participants: [],
+    date: "2023-03-01",
+    startTime: "9:00",
+    endTime: "10:00",
+  },
+  {
+    id: "wed-5",
+    lessonType: lessonTypesData[2],
+    participants: [],
+    date: "2023-03-01",
+    startTime: "9:30",
+    endTime: "10:30",
+  },
+];
 
-export type EventsLine = Event[];
-
-export type Position = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-export type PositionedEvent = Event & { position: Position };
-
-export const calendarData: Record<string, Lesson[]> = {
-  Mon: [
-    {
-      id: "mon-1",
-      lessonType: lessonTypesData[3],
-      participants: [],
-      date: "2023-02-27",
-      startTime: "8:30",
-      endTime: "9:00",
-    },
-    {
-      id: "mon-2",
-      lessonType: lessonTypesData[0],
-      participants: [],
-      date: "2023-02-27",
-      startTime: "10:00",
-      endTime: "11:00",
-    },
-    {
-      id: "mon-3",
-      lessonType: lessonTypesData[6],
-      participants: [],
-      date: "2023-02-27",
-      startTime: "11:30",
-      endTime: "13:00",
-    },
-  ],
-  Tue: [
-    {
-      id: "tue-1",
-      lessonType: lessonTypesData[3],
-      participants: [],
-      date: "2023-02-28",
-      startTime: "8:30",
-      endTime: "9:00",
-    },
-    {
-      id: "tue-2",
-      lessonType: lessonTypesData[3],
-      participants: [],
-      date: "2023-02-28",
-      startTime: "10:30",
-      endTime: "11:30",
-    },
-    {
-      id: "tue-3",
-      lessonType: lessonTypesData[0],
-      participants: [],
-      date: "2023-02-28",
-      startTime: "11:00",
-      endTime: "12:00",
-    },
-    {
-      id: "tue-4",
-      lessonType: lessonTypesData[3],
-      participants: [],
-      date: "2023-02-28",
-      startTime: "11:30",
-      endTime: "13:00",
-    },
-  ],
-  Wed: [
-    {
-      id: "wed-1",
-      lessonType: lessonTypesData[2],
-      participants: [],
-      date: "2023-03-01",
-      startTime: "8:30",
-      endTime: "9:30",
-    },
-    {
-      id: "wed-2",
-      lessonType: lessonTypesData[8],
-      participants: [],
-      date: "2023-03-01",
-      startTime: "9:00",
-      endTime: "10:00",
-    },
-    {
-      id: "wed-3",
-      lessonType: lessonTypesData[3],
-      participants: [],
-      date: "2023-03-01",
-      startTime: "8:00",
-      endTime: "9:00",
-    },
-    {
-      id: "wed-4",
-      lessonType: lessonTypesData[5],
-      participants: [],
-      date: "2023-03-01",
-      startTime: "9:00",
-      endTime: "10:00",
-    },
-    {
-      id: "wed-5",
-      lessonType: lessonTypesData[2],
-      participants: [],
-      date: "2023-03-01",
-      startTime: "9:30",
-      endTime: "10:30",
-    },
-  ],
-};
+export const calendarData: Record<string, Lesson[]> =
+  groupLessonsByDate(lessonsData);
 
 function dumpLessonToEvent(lesson: Lesson): Event {
   return {
     id: lesson.id,
+    date: parse(lesson.date, "yyyy-MM-dd", new Date()),
     startTime: timeToMinutes(lesson.startTime),
     endTime: timeToMinutes(lesson.endTime),
     coaches: lesson.lessonType.coaches.map((coach) => coach.name as COACHES),
@@ -220,8 +225,30 @@ function dumpLessonToEvent(lesson: Lesson): Event {
   };
 }
 
-export const events: Record<string, Event[]> = {
-  Mon: calendarData.Mon.map(dumpLessonToEvent),
-  Tue: calendarData.Tue.map(dumpLessonToEvent),
-  Wed: calendarData.Wed.map(dumpLessonToEvent),
-};
+export function getEventsByDate(date: Date): Event[] {
+  const formattedDate = format(date, "yyyy-MM-dd");
+
+  return (calendarData[formattedDate] || []).map(dumpLessonToEvent);
+}
+
+export function addLesson(lesson: Lesson) {
+  if (!calendarData[lesson.date]) {
+    calendarData[lesson.date] = [];
+  }
+
+  calendarData[lesson.date].push(lesson);
+}
+
+function groupLessonsByDate(lessons: Lesson[]): Record<string, Lesson[]> {
+  const map: Record<string, Lesson[]> = {};
+
+  for (const lesson of lessons) {
+    if (!(lesson.date in map)) {
+      map[lesson.date] = [];
+    }
+
+    map[lesson.date].push(lesson);
+  }
+
+  return map;
+}

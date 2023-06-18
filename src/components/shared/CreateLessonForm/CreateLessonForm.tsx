@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import {
   FormControl,
   FormLabel,
-  Container,
   Button,
   VStack,
   Heading,
 } from "@chakra-ui/react";
-import { COACHES, coachesData } from "../../../constants/data";
+import { COACHES, coachesData, Event } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
-import { RadioGroup } from "../../base/RadioGroup/RadioGroup";
-import { CheckboxGroup } from "../../base/CheckboxGroup/CheckboxGroup";
+import RadioGroup from "../../base/RadioGroup/RadioGroup";
+import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
+import { format } from "date-fns";
+import { minutesToTime } from "../../../utils/calendar";
 
 const lessonOptions: LESSON_TYPES[] = [
   LESSON_TYPES.SPLIT,
@@ -29,9 +30,17 @@ export type CreateLessonFormProps = {
     coaches: COACHES[],
     duration: number
   ) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+  selectedFreeSlot?: Event;
 };
 
-export const CreateLessonForm: React.FC<CreateLessonFormProps> = (props) => {
+export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
+  selectedFreeSlot,
+  onShowFreeSlots,
+  onSubmit,
+  onCancel,
+}) => {
   const [selectedLessonType, setSelectedLessonType] = useState<string>(
     lessonOptions[0]
   );
@@ -39,6 +48,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = (props) => {
   const [selectedDuration, setSelectedDuration] = useState<string>(
     durationOptions[1]
   );
+  const [areFreeSlotsRequested, setAreFreeSlotsRequested] = useState(false);
 
   const changeSelectedCoaches = (value: string[]) => {
     setSelectedCoaches(value as COACHES[]);
@@ -46,18 +56,40 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = (props) => {
 
   const showFreeSlots = (e: any) => {
     if (selectedCoaches.length) {
-      props.onShowFreeSlots(
+      onShowFreeSlots(
         selectedLessonType as LESSON_TYPES,
         selectedCoaches as COACHES[],
         +selectedDuration
       );
+      setAreFreeSlotsRequested(true);
     }
   };
 
+  const submitForm = (e: any) => {
+    e.preventDefault();
+    resetForm(e);
+    onSubmit();
+  };
+
+  const resetForm = (e: any) => {
+    e.preventDefault();
+    setSelectedLessonType(lessonOptions[0]);
+    changeSelectedCoaches([]);
+    setSelectedDuration(durationOptions[1]);
+    setAreFreeSlotsRequested(false);
+    onCancel();
+  };
+
   return (
-    <form>
-      <VStack w="300px" alignItems="flex-start" spacing={8}>
-        <Heading>Add lesson</Heading>
+    <form onSubmit={submitForm} onReset={resetForm}>
+      <VStack
+        w="300px"
+        paddingX={5}
+        alignItems="flex-start"
+        spacing={8}
+        overflow="hidden"
+      >
+        <Heading>Book lesson</Heading>
         <FormControl>
           <FormLabel>Lesson type</FormLabel>
           <RadioGroup
@@ -86,8 +118,33 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = (props) => {
             colorScheme={colorScheme}
           />
         </FormControl>
-        <Button colorScheme={colorScheme} type="button" onClick={showFreeSlots}>
+        <Button
+          colorScheme={colorScheme}
+          type="button"
+          onClick={showFreeSlots}
+          isDisabled={areFreeSlotsRequested || selectedCoaches.length === 0}
+        >
           Show free slots
+        </Button>
+
+        <FormControl>
+          <FormLabel>
+            {selectedFreeSlot &&
+              `${format(selectedFreeSlot.date, "E dd")}: ${minutesToTime(
+                selectedFreeSlot.startTime
+              )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
+          </FormLabel>
+        </FormControl>
+
+        <Button
+          colorScheme={colorScheme}
+          type="submit"
+          isDisabled={!selectedFreeSlot}
+        >
+          Book lesson
+        </Button>
+        <Button colorScheme={"gray"} type="reset">
+          Cancel
         </Button>
       </VStack>
     </form>

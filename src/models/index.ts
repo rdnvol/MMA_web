@@ -6,10 +6,10 @@ export enum LESSON_TYPES {
 }
 
 export const TYPE_COLOR_MAP: Record<LESSON_TYPES, string> = {
-  [LESSON_TYPES.PERSONAL]: "blue.200",
-  [LESSON_TYPES.GROUP]: "green.200",
-  [LESSON_TYPES.SPLIT]: "yellow.200",
-  [LESSON_TYPES.MASSAGE]: "red.200",
+  [LESSON_TYPES.PERSONAL]: "purple.400",
+  [LESSON_TYPES.GROUP]: "teal.400",
+  [LESSON_TYPES.SPLIT]: "blue.400",
+  [LESSON_TYPES.MASSAGE]: "pink.400",
 };
 
 export enum BUSY_LEVELS {
