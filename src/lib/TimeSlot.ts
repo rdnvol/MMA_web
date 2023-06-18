@@ -2,7 +2,6 @@ import { COACHES, Event } from "../constants/data";
 import { Coach } from "../models";
 import arrayToMap from "../utils/arrayToMap";
 import { Meeting } from "../utils/calendar";
-import TimeSlotsMap from "./TimeSlotsMap";
 
 type Business = {
   floating: Event[];
@@ -14,7 +13,6 @@ export default class TimeSlot {
   constructor(
     public startTime: number,
     public duration: number,
-    private parent: TimeSlotsMap,
     public isFloating?: boolean,
     private coachToBusiness: Record<string, Business> = {}
   ) {}
@@ -57,7 +55,7 @@ export default class TimeSlot {
     }
   }
 
-  isAvailableForFulltime(coaches: string[]): boolean {
+  isAvailableForFulltime(coaches: number[]): boolean {
     return coaches.every((coach) =>
       this._isAvailableForFulltime(this.coachToBusiness[coach])
     );
@@ -95,7 +93,7 @@ export default class TimeSlot {
     return true;
   }
 
-  isAvailableForHalftime(coaches: string[]): boolean {
+  isAvailableForHalftime(coaches: number[]): boolean {
     return coaches.every((coach) =>
       this._isAvailableForHalftime(this.coachToBusiness[coach])
     );
@@ -137,7 +135,7 @@ export default class TimeSlot {
     return true;
   }
 
-  isAvailableForFloating(coaches: string[]): boolean {
+  isAvailableForFloating(coaches: number[]): boolean {
     return coaches.every((coach) =>
       this._isAvailableForFloating(this.coachToBusiness[coach])
     );
@@ -182,12 +180,6 @@ export default class TimeSlot {
 
     return true;
   }
-
-  getCoachBusiness(coach: COACHES): Business {
-    return this.coachToBusiness[coach];
-  }
-
-  // _getFlatten
 }
 
 function isCoveringBounds(boundsA: Meeting, boundsB: Meeting): boolean {

@@ -1,4 +1,4 @@
-import { slotDuration, Event, COACHES } from "../constants/data";
+import { slotDuration, Event } from "../constants/data";
 import { BUSY_LEVELS, LessonType } from "../models";
 import TimeSlot from "./TimeSlot";
 
@@ -23,7 +23,7 @@ export default class TimeSlotsMap {
     let time = bounds[0];
 
     while (time + duration <= bounds[1]) {
-      timeSlotsMap[time] = new TimeSlot(time, duration, this);
+      timeSlotsMap[time] = new TimeSlot(time, duration);
       time += slotDuration;
     }
 
@@ -61,9 +61,7 @@ export default class TimeSlotsMap {
   getAvailableTimeSlots(lessonType: LessonType): TimeSlot[] {
     const timeSlots: TimeSlot[] = [];
 
-    const coaches: COACHES[] = lessonType.coaches.map(
-      (coach) => coach.name as COACHES
-    );
+    const coaches: number[] = lessonType.coaches.map((coach) => coach.id);
     const isFloating = lessonType.coaches.length > 1;
     const isHalfTime = lessonType.coachBusyLevel === BUSY_LEVELS.Half;
 

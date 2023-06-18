@@ -14,7 +14,7 @@ import {
 } from "../utils/calendar";
 
 export const DATE_FORMAT = "yyyy-MM-dd";
-export const TIME_FORMAT = "hh:mm";
+export const TIME_FORMAT = "H:mm";
 export const today = new Date();
 export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
