@@ -1,11 +1,10 @@
-import { Box, Card, VStack, Text, Flex } from "@chakra-ui/react";
+import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 
 import { COACHES, Position } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
 
 const minHeight = 40;
-const maxWidth = 160;
 
 const colorsMap: Record<COACHES, string> = {
   [COACHES.Vika]: "green.300",
@@ -26,6 +25,9 @@ export type LessonCardProps = {
 export const LessonCard: React.FC<LessonCardProps> = (
   props: LessonCardProps
 ) => {
+  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
+  const maxWidth = isLargerThan600 ? 160 : 80;
+
   const height = props.position.h * 40;
   const width = props.position.w * maxWidth;
   const top = props.position.y * minHeight;
