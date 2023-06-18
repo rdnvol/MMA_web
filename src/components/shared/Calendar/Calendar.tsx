@@ -54,6 +54,16 @@ export const Calendar: React.FC = () => {
     setSelectedFreeSlot(undefined);
   };
 
+  const submitDeleteLesson = async (lessonId: number) => {
+    cancelDeleteLesson();
+    await deleteLesson(lessonId);
+    refetchLessons();
+  };
+
+  const cancelDeleteLesson = async () => {
+    setSelectedEvent(undefined);
+  };
+
   return (
     <Grid
       templateAreas={`"control"
@@ -95,11 +105,8 @@ export const Calendar: React.FC = () => {
       <DeleteLessonModal
         event={selectedEvent}
         isOpen={!!selectedEvent}
-        onSubmit={(lessonId: number) => {
-          deleteLesson(lessonId);
-          setSelectedEvent(undefined);
-        }}
-        onCancel={() => setSelectedEvent(undefined)}
+        onSubmit={submitDeleteLesson}
+        onCancel={cancelDeleteLesson}
       />
     </Grid>
   );

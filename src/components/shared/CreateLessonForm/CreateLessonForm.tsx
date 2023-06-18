@@ -336,7 +336,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             }
           />
         </FormControl>
-        <FormControl as={Flex}>
+        <FormControl as={Flex} gap="2" alignItems="center">
           <Input
             placeholder="From"
             size="md"
@@ -345,6 +345,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             value={selectedStartTime}
             onChange={(evt) => setSelectedStartTime(evt.target.value)}
           />
+          <Text>{"-"}</Text>
           <Input
             placeholder="To"
             size="md"

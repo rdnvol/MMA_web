@@ -38,6 +38,10 @@ export default class TimeSlotsMap {
     // start from last one time slot
     let timeSlot = this.getTimeSlot(endTime - slotDuration);
 
+    if (!timeSlot && endTime === this.dailyBounds[1]) {
+      timeSlot = this.getTimeSlot(endTime - 2 * slotDuration);
+    }
+
     while (!!timeSlot && timeSlot.startTime + timeSlot.duration > startTime) {
       timeSlots.push(timeSlot);
       timeSlot = this.getTimeSlot(timeSlot.startTime - slotDuration);
