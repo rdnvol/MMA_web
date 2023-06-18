@@ -6,11 +6,7 @@ import {
   LessonType,
   LESSON_TYPES,
 } from "../models";
-import {
-  minutesToTime,
-  timeToMinutes,
-  mergeDateAndMinutes,
-} from "../utils/calendar";
+import { minutesToTime, timeToMinutes } from "../utils/calendar";
 
 export const DATE_FORMAT = "yyyy-MM-dd";
 export const TIME_FORMAT = "H:mm";
@@ -105,21 +101,6 @@ export function dumpLessonToEvent(lesson: Lesson): Event {
       !lesson.coachOrder?.length,
     isHalfTime: lesson.lessonType.coachBusyLevel === BUSY_LEVELS.Half,
     coachOrder: lesson.coachOrder,
-  };
-}
-
-export function dumpEventToLesson(event: Event): Lesson {
-  const startDate = mergeDateAndMinutes(event.date, event.startTime);
-  const endDate = mergeDateAndMinutes(event.date, event.endTime);
-
-  return {
-    id: event.id,
-    name: event.label,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    participants: [],
-    lessonType: event.lessonType,
-    coachOrder: [],
   };
 }
 

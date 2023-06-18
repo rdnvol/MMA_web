@@ -46,8 +46,10 @@ export function minutesToTime(minutes: number): string {
   return `${hours}:${min}`;
 }
 
-export function mergeDateAndMinutes(date: Date, minutes: number): Date {
+export function mergeDateAndTime(date: Date, time: string): Date {
   const newDate = new Date(date);
+
+  const minutes = timeToMinutes(time);
 
   const hours = Math.floor(minutes / 60);
   const min = minutes % 60;

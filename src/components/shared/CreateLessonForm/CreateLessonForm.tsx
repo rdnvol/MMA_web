@@ -17,12 +17,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { FaChevronUp, FaChevronDown, FaPlus, FaTimes } from "react-icons/fa";
-import { dumpEventToLesson, Event } from "../../../constants/data";
+import { DATE_FORMAT, Event } from "../../../constants/data";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import RadioGroup from "../../base/RadioGroup/RadioGroup";
 import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
-import { format } from "date-fns";
-import { minutesToTime } from "../../../utils/calendar";
+import { format, parse } from "date-fns";
+import { mergeDateAndTime, minutesToTime } from "../../../utils/calendar";
 import { useGetCoachesQuery } from "../../../services/coaches";
 import { useGetLessonTypesQuery } from "../../../services/lessonTypes";
 import { createLesson } from "../../../services/lessons";
@@ -44,6 +44,7 @@ enum VIEWS {
   NONE,
   SELECT_COACH,
   SELECT_FREES_SLOT,
+  DATE_TIME,
   ADD_PARTICIPANTS,
 }
 
@@ -69,6 +70,9 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [selectedLessonType, setSelectedLessonType] = useState<
     LESSON_TYPES | undefined
   >();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedStartTime, setSelectedStartTime] = useState<string>("");
+  const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedDuration] = useState<string>(durationOptions[1]);
   const [label, setLabel] = useState<string>("");
 
@@ -84,6 +88,10 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
   useEffect(() => {
     if (!!selectedFreeSlot) {
+      setSelectedDate(selectedFreeSlot.date);
+      setSelectedStartTime(minutesToTime(selectedFreeSlot.startTime));
+      setSelectedEndTime(minutesToTime(selectedFreeSlot.endTime));
+
       setView(VIEWS.ADD_PARTICIPANTS);
     }
   }, [selectedFreeSlot]);
@@ -116,19 +124,31 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     }
   };
 
+  const showManualDateTimeInput = () => {
+    if (selectedLessonType) {
+      setView(VIEWS.DATE_TIME);
+    }
+  };
+
   const submitForm = async (e: any) => {
     e.preventDefault();
 
-    if (!selectedFreeSlot) {
+    if (
+      !selectedLessonType ||
+      !selectedDate ||
+      !selectedStartTime ||
+      !selectedEndTime
+    ) {
       return;
     }
 
-    const lessonToCreate = dumpEventToLesson(selectedFreeSlot);
-
     await createLesson({
-      lessonTypeId: lessonToCreate.lessonType.id,
-      startDate: lessonToCreate.startDate,
-      endDate: lessonToCreate.endDate,
+      lessonTypeId: lessonTypesMap[selectedLessonType].id,
+      startDate: mergeDateAndTime(
+        selectedDate,
+        selectedStartTime
+      ).toISOString(),
+      endDate: mergeDateAndTime(selectedDate, selectedEndTime).toISOString(),
       name: label,
     });
 
@@ -141,6 +161,9 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     setSelectedLessonType(undefined);
     setSelectedCoaches([]);
     setLabel("");
+    setSelectedDate(undefined);
+    setSelectedStartTime("");
+    setSelectedEndTime("");
 
     onCancel();
 
@@ -187,13 +210,18 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
       );
     }
 
-    if (view === VIEWS.SELECT_FREES_SLOT || view === VIEWS.ADD_PARTICIPANTS) {
+    if (
+      view === VIEWS.SELECT_FREES_SLOT ||
+      view === VIEWS.ADD_PARTICIPANTS ||
+      view === VIEWS.DATE_TIME
+    ) {
       return (
         <Flex
           w="full"
           alignItems="center"
           flexDirection="row"
           justifyContent="space-between"
+          minH="8"
         >
           <Flex
             flexDirection="row"
@@ -211,29 +239,32 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   .join(", ")}
             </Heading>
             <Text noOfLines={1}>
-              {selectedFreeSlot &&
-                `${format(selectedFreeSlot.date, "E dd")}, ${minutesToTime(
-                  selectedFreeSlot.startTime
-                )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
+              {selectedDate && format(selectedDate, "E dd")}
+              {selectedStartTime && `, ${selectedStartTime}`}
+              {selectedEndTime && ` - ${selectedEndTime}`}
             </Text>
           </Flex>
-          <IconButton
-            variant="ghost"
-            colorScheme={colorScheme}
-            aria-label="book-lesson-icon"
-            icon={
-              <Icon
-                as={
-                  view === VIEWS.SELECT_FREES_SLOT ? FaChevronUp : FaChevronDown
-                }
-              />
-            }
-            onClick={() =>
-              view === VIEWS.SELECT_FREES_SLOT
-                ? setView(VIEWS.ADD_PARTICIPANTS)
-                : setView(VIEWS.SELECT_FREES_SLOT)
-            }
-          />
+          {view !== VIEWS.DATE_TIME && (
+            <IconButton
+              variant="ghost"
+              colorScheme={colorScheme}
+              aria-label="book-lesson-icon"
+              icon={
+                <Icon
+                  as={
+                    view === VIEWS.SELECT_FREES_SLOT
+                      ? FaChevronUp
+                      : FaChevronDown
+                  }
+                />
+              }
+              onClick={() =>
+                view === VIEWS.SELECT_FREES_SLOT
+                  ? setView(VIEWS.ADD_PARTICIPANTS)
+                  : setView(VIEWS.SELECT_FREES_SLOT)
+              }
+            />
+          )}
         </Flex>
       );
     }
@@ -270,6 +301,14 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               Cancel
             </Button>
             <Button
+              variant="ghost"
+              colorScheme={colorScheme}
+              onClick={showManualDateTimeInput}
+              isDisabled={selectedCoaches.length === 0 || !selectedLessonType}
+            >
+              Manual
+            </Button>
+            <Button
               colorScheme={colorScheme}
               onClick={showFreeSlots}
               isDisabled={selectedCoaches.length === 0 || !selectedLessonType}
@@ -279,6 +318,64 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           </Flex>
         </VStack>
       </Flex>
+    );
+  };
+
+  const renderDateTimeInputForm = () => {
+    return (
+      <VStack mt="2">
+        <FormControl>
+          <Input
+            autoFocus
+            size="md"
+            type="date"
+            colorScheme={colorScheme}
+            value={selectedDate ? format(selectedDate, DATE_FORMAT) : ""}
+            onChange={(evt) =>
+              setSelectedDate(parse(evt.target.value, DATE_FORMAT, new Date()))
+            }
+          />
+        </FormControl>
+        <FormControl as={Flex}>
+          <Input
+            placeholder="From"
+            size="md"
+            type="time"
+            colorScheme={colorScheme}
+            value={selectedStartTime}
+            onChange={(evt) => setSelectedStartTime(evt.target.value)}
+          />
+          <Input
+            placeholder="To"
+            size="md"
+            type="time"
+            colorScheme={colorScheme}
+            value={selectedEndTime}
+            onChange={(evt) => setSelectedEndTime(evt.target.value)}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel>Name</FormLabel>
+          <Input
+            value={label}
+            onChange={(evt) => setLabel(evt.target.value)}
+            colorScheme={colorScheme}
+          />
+        </FormControl>
+
+        <Flex width="full" justifyContent="space-between">
+          <Button colorScheme={"gray"} onClick={resetForm}>
+            Cancel
+          </Button>
+          <Button
+            colorScheme={colorScheme}
+            onClick={submitForm}
+            isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
+          >
+            Book lesson
+          </Button>
+        </Flex>
+      </VStack>
     );
   };
 
@@ -302,7 +399,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           <Button
             colorScheme={colorScheme}
             onClick={submitForm}
-            isDisabled={!selectedFreeSlot}
+            isDisabled={!selectedDate || !selectedStartTime || !selectedEndTime}
           >
             Book lesson
           </Button>
@@ -327,6 +424,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     >
       {renderHeader()}
       {view === VIEWS.SELECT_COACH && renderSelectLessonTypeForm()}
+      {view === VIEWS.DATE_TIME && renderDateTimeInputForm()}
       {view === VIEWS.ADD_PARTICIPANTS && renderAddParticipantsForm()}
     </Flex>
   );
@@ -346,6 +444,10 @@ function getHeight(view: VIEWS, isLargerThan500: boolean): number {
 
   if (view === VIEWS.ADD_PARTICIPANTS) {
     return 208;
+  }
+
+  if (view === VIEWS.DATE_TIME) {
+    return 272;
   }
 
   return 50;
