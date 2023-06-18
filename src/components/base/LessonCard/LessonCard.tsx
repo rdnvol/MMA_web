@@ -20,6 +20,7 @@ export type LessonCardProps = {
   lessonType?: LESSON_TYPES;
   isFloating?: boolean;
   selectedCoaches?: COACHES[];
+  onClick?: () => void;
 };
 
 export const LessonCard: React.FC<LessonCardProps> = (
@@ -78,6 +79,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
       direction="row"
       overflow="hidden"
       variant={"outline"}
+      onClick={props.onClick}
     >
       <VStack h="100%" w="5px" minW="5px" spacing={0}>
         {colors.map((bgColor, index) => (
