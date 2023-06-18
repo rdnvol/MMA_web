@@ -1,0 +1,35 @@
+{
+  "common": {
+    "Book lesson": "Book lesson",
+    "Today": "Today",
+    "Coaches": "Coaches",
+    "Type": "Type",
+    "Delete": "Delete",
+    "Cancel": "Cancel",
+    "Manual": "Manual",
+    "Name": "Name",
+    "Show free slots": "Show free slots",
+    "Delete lesson?": "Delete lesson?",
+    "Time": "Time"
+  },
+  "lessonType": {
+    "personal": "personal",
+    "group": "group",
+    "split": "split",
+    "massage": "massage",
+    "other": "other"
+  },
+  "coach": {
+    "Vika": "Vika",
+    "Sasha": "Sasha"
+  },
+  "dow": {
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun"
+  }
+}

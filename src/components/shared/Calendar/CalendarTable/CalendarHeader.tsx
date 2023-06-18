@@ -2,12 +2,15 @@ import React from "react";
 import { Circle, Flex } from "@chakra-ui/react";
 import { cellHeight } from "../../../../constants/table";
 import { format, isToday } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export type CalendarHeaderProps = {
   header: string | Date;
 };
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({ header }) => {
+  const { t } = useTranslation("dow");
+
   return (
     <Flex
       h={`${cellHeight}px`}
@@ -26,7 +29,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ header }) => {
         header
       ) : (
         <>
-          {format(header, "E")}
+          {t(format(header, "E"))}
           <Circle
             size="28px"
             bg={isToday(header) ? "orange.600" : ""}

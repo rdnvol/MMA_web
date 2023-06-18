@@ -51,11 +51,6 @@ export type Position = {
 
 export type PositionedEvent = Event & { position: Position };
 
-export const coachesData: Coach[] = [
-  { id: 1, email: "sasha@mma-app.com", name: "Sasha" },
-  { id: 2, email: "vika@mma-app.com", name: "Vika" },
-];
-
 export function getDateRange(start?: string, end?: string): Date[] {
   if (!start || !end) {
     return [];

@@ -1,0 +1,35 @@
+{
+  "common": {
+    "Book lesson": "Створити урок",
+    "Today": "Сьогодні",
+    "Coaches": "Тренери",
+    "Type": "Тип",
+    "Delete": "Видалити",
+    "Cancel": "Відміна",
+    "Manual": "Вручну",
+    "Name": "Назва",
+    "Show free slots": "Показати вільні",
+    "Delete lesson?": "Видалити урок?",
+    "Time": "Час"
+  },
+  "lessonType": {
+    "personal": "персонально",
+    "group": "група",
+    "split": "спліт",
+    "massage": "масаж",
+    "other": "інше"
+  },
+  "coach": {
+    "Vika": "Віка",
+    "Sasha": "Саша"
+  },
+  "dow": {
+    "Mon": "Пн",
+    "Tue": "Вт",
+    "Wed": "Ср",
+    "Thu": "Чт",
+    "Fri": "Пт",
+    "Sat": "Сб",
+    "Sun": "Нд"
+  }
+}
