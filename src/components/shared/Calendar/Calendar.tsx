@@ -6,6 +6,8 @@ import {
   VStack,
   Circle,
   Flex,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
 
 import {
@@ -23,12 +25,14 @@ import {
   getPositionedEvents,
   getFreeSlots,
   minutesToTime,
+  filterEventsByCoaches,
 } from "../../../utils/calendar";
 import CreateLessonForm from "../CreateLessonForm";
 import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
+import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
 
 const cakraHeight = 10;
 const cakraWidth = 40;
@@ -41,6 +45,12 @@ export const Calendar: React.FC = () => {
   const [selectedFreeSlot, setSelectedFreeSlot] = useState<
     PositionedEvent | undefined
   >();
+
+  const [selectedCoaches, setSelectedCoaches] = useState<COACHES[]>([]);
+
+  const changeSelectedCoaches = (value: string[]) => {
+    setSelectedCoaches(value as COACHES[]);
+  };
 
   const renderHeader = (header: string | Date) => (
     <Flex h={cakraHeight} alignItems="center" gap={2}>
@@ -72,6 +82,7 @@ export const Calendar: React.FC = () => {
       <LessonCard
         position={positionedEvent.position}
         coaches={positionedEvent.coaches}
+        label={positionedEvent.label}
         lessonType={positionedEvent.lessonType}
       />
     );
@@ -134,50 +145,72 @@ export const Calendar: React.FC = () => {
   };
 
   return (
-    <HStack
-      spacing="0px"
-      divider={<StackDivider borderColor="gray.200" />}
-      alignItems="flex-start"
+    <Grid
+      templateAreas={`"nav calendar form"`}
+      gridTemplateRows={"1fr"}
+      gridTemplateColumns={"150px 1fr 300px"}
+      h="100vh"
+      overflowY="hidden"
+      gap="1"
+      color="blackAlpha.700"
     >
-      <VStack spacing={0} position="relative">
-        {renderHeader("Time")}
-        {timeData.map(renderTime)}
-      </VStack>
-      {currentWeek.map((date) => (
-        <VStack key={date.toDateString()} spacing={0}>
-          {renderHeader(date)}
-          <Box
-            position="relative"
-            w={cakraWidth}
-            h={cakraHeight * timeData.length}
-          >
-            {getPositionedEvents(
-              getEventsByDate(date),
-              dailyBounds,
-              slotDuration
-            ).map((event) => renderLesson(event))}
-            {selectedLessonType &&
-              getFreeSlots(
-                getEventsByDate(date),
-                dailyBounds,
-                selectedDuration,
-                date,
-                (selectedLessonType.coaches || []).map(
-                  (coach) => coach.name as COACHES
-                )
-              ).map((event) => renderEmptySlot(event))}
-          </Box>
-        </VStack>
-      ))}
-      {
+      <GridItem pl="2" area={"nav"}>
+        <CheckboxGroup
+          options={[
+            { value: COACHES.Sasha, colorScheme: "red" },
+            { value: COACHES.Vika, colorScheme: "green" },
+          ]}
+          value={selectedCoaches}
+          onChange={changeSelectedCoaches}
+        />
+      </GridItem>
+      <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
+        <HStack
+          spacing="0px"
+          divider={<StackDivider borderColor="gray.200" />}
+          alignItems="flex-start"
+        >
+          <VStack spacing={0} position="relative">
+            {renderHeader("Time")}
+            {timeData.map(renderTime)}
+          </VStack>
+          {currentWeek.map((date) => (
+            <VStack key={date.toDateString()} spacing={0}>
+              {renderHeader(date)}
+              <Box
+                position="relative"
+                w={cakraWidth}
+                h={cakraHeight * timeData.length}
+              >
+                {getPositionedEvents(
+                  filterEventsByCoaches(getEventsByDate(date), selectedCoaches),
+                  dailyBounds,
+                  slotDuration
+                ).map((event) => renderLesson(event))}
+                {selectedLessonType &&
+                  getFreeSlots(
+                    getEventsByDate(date),
+                    dailyBounds,
+                    selectedDuration,
+                    date,
+                    (selectedLessonType.coaches || []).map(
+                      (coach) => coach.name as COACHES
+                    )
+                  ).map((event) => renderEmptySlot(event))}
+              </Box>
+            </VStack>
+          ))}
+        </HStack>
+      </GridItem>
+      <GridItem pl="2" area={"form"}>
         <CreateLessonForm
           selectedFreeSlot={selectedFreeSlot}
           onShowFreeSlots={showFreeSlots}
           onSubmit={submitCreateLesson}
           onCancel={cancelCreateLesson}
         />
-      }
-    </HStack>
+      </GridItem>
+    </Grid>
   );
 };
 

@@ -20,10 +20,8 @@ export const EmptySlotCard: React.FC<EmptySlotCardProps> = (
   const top = props.position.y * minHeight;
   const left = props.position.x * maxWidth;
 
-  const Component = props.isSelected ? Skeleton : Card;
-
   return (
-    <Component
+    <Card
       position="absolute"
       top={`${top}px`}
       left={`${left}px`}
@@ -39,11 +37,19 @@ export const EmptySlotCard: React.FC<EmptySlotCardProps> = (
       }}
       bgColor={"orange.100"}
       onClick={props.onClick}
-      endColor="orange.100"
-      startColor="orange.400"
-      zIndex={props.isSelected ? 3 : 1}
-      borderRadius={props.isSelected ? 8 : 0}
-    />
+      borderRadius={0}
+    >
+      {props.isSelected && (
+        <Skeleton
+          w={`${width}px`}
+          h={`${height}px`}
+          endColor="orange.100"
+          startColor="orange.400"
+          borderRadius={8}
+          zIndex={3}
+        />
+      )}
+    </Card>
   );
 };
 

@@ -170,6 +170,17 @@ export function getPositionedEvents(
   return positionedEvents;
 }
 
+export function filterEventsByCoaches(
+  events: Event[],
+  coaches: COACHES[]
+): Event[] {
+  return coaches.length
+    ? events.filter((event: Event) =>
+        event.coaches.some((coach) => coaches.includes(coach))
+      )
+    : events;
+}
+
 export function getFreeSlots(
   events: Event[],
   dailyBounds: [number, number],
@@ -177,11 +188,7 @@ export function getFreeSlots(
   date: Date,
   coaches?: COACHES[]
 ): PositionedEvent[] {
-  const filteredEvents = coaches?.length
-    ? events.filter((event: Event) =>
-        event.coaches.some((coach) => coaches.includes(coach))
-      )
-    : events;
+  const filteredEvents = filterEventsByCoaches(events, coaches || []);
 
   const calendar: Calendar = filteredEvents.map((event: Event) => [
     event.startTime,

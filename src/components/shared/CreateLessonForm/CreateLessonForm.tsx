@@ -86,10 +86,10 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
         w="300px"
         paddingX={5}
         alignItems="flex-start"
-        spacing={8}
+        spacing={4}
         overflow="hidden"
       >
-        <Heading>Book lesson</Heading>
+        <Heading size="md">Book lesson</Heading>
         <FormControl>
           <FormLabel>Lesson type</FormLabel>
           <RadioGroup

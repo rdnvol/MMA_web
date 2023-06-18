@@ -5,6 +5,7 @@ import {
   Lesson,
   LessonType,
   LESSON_TYPES,
+  Participant,
 } from "../models";
 import {
   minutesToTime,
@@ -37,6 +38,7 @@ export type Event = {
   endTime: number;
   coaches: COACHES[];
   lessonType?: LESSON_TYPES;
+  label?: string;
 };
 
 export type EventsLine = Event[];
@@ -110,13 +112,80 @@ export const lessonTypesData: LessonType[] = [
     coaches: [coachesData[0], coachesData[1]],
     coachBusyLevel: BUSY_LEVELS.HALF,
   },
+
+  // Other
+  {
+    id: "other-sasha",
+    type: LESSON_TYPES.OTHER,
+    coaches: [coachesData[0]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  },
+  {
+    id: "other-vika",
+    type: LESSON_TYPES.OTHER,
+    coaches: [coachesData[1]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  },
+  {
+    id: "other-sasha-vika",
+    type: LESSON_TYPES.OTHER,
+    coaches: [coachesData[0], coachesData[1]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  },
+];
+
+const participantsData: Participant[] = [
+  {
+    id: "participant-1",
+    email: "vira@mma-app.com",
+    name: "Віра",
+  },
+  {
+    id: "participant-2",
+    email: "karim@mma-app.com",
+    name: "Карім",
+  },
+  {
+    id: "participant-3",
+    email: "olia@mma-app.com",
+    name: "Оля",
+  },
+  {
+    id: "participant-4",
+    email: "sasha@mma-app.com",
+    name: "Саша",
+  },
+  {
+    id: "participant-5",
+    email: "ulia@mma-app.com",
+    name: "Юля",
+  },
+  {
+    id: "participant-6",
+    email: "anton@mma-app.com",
+    name: "Антон",
+  },
+  {
+    id: "participant-7",
+    email: "weekend@mma-app.com",
+    name: "Вихідний",
+  },
 ];
 
 const lessonsData: Lesson[] = [
   {
+    id: "sun-1",
+    lessonType: lessonTypesData[11],
+    participants: [participantsData[6]],
+    date: "2023-02-26",
+    startTime: "8:00",
+    endTime: "18:00",
+  },
+
+  {
     id: "mon-1",
     lessonType: lessonTypesData[3],
-    participants: [],
+    participants: [participantsData[3]],
     date: "2023-02-27",
     startTime: "8:30",
     endTime: "9:00",
@@ -124,7 +193,7 @@ const lessonsData: Lesson[] = [
   {
     id: "mon-2",
     lessonType: lessonTypesData[0],
-    participants: [],
+    participants: [participantsData[2]],
     date: "2023-02-27",
     startTime: "10:00",
     endTime: "11:00",
@@ -132,7 +201,7 @@ const lessonsData: Lesson[] = [
   {
     id: "mon-3",
     lessonType: lessonTypesData[6],
-    participants: [],
+    participants: [participantsData[0], participantsData[1]],
     date: "2023-02-27",
     startTime: "11:30",
     endTime: "13:00",
@@ -140,7 +209,7 @@ const lessonsData: Lesson[] = [
   {
     id: "tue-1",
     lessonType: lessonTypesData[3],
-    participants: [],
+    participants: [participantsData[1]],
     date: "2023-02-28",
     startTime: "8:30",
     endTime: "9:00",
@@ -148,7 +217,7 @@ const lessonsData: Lesson[] = [
   {
     id: "tue-2",
     lessonType: lessonTypesData[3],
-    participants: [],
+    participants: [participantsData[0]],
     date: "2023-02-28",
     startTime: "10:30",
     endTime: "11:30",
@@ -156,7 +225,7 @@ const lessonsData: Lesson[] = [
   {
     id: "tue-3",
     lessonType: lessonTypesData[0],
-    participants: [],
+    participants: [participantsData[3]],
     date: "2023-02-28",
     startTime: "11:00",
     endTime: "12:00",
@@ -164,7 +233,7 @@ const lessonsData: Lesson[] = [
   {
     id: "tue-4",
     lessonType: lessonTypesData[3],
-    participants: [],
+    participants: [participantsData[2]],
     date: "2023-02-28",
     startTime: "11:30",
     endTime: "13:00",
@@ -172,7 +241,7 @@ const lessonsData: Lesson[] = [
   {
     id: "wed-1",
     lessonType: lessonTypesData[2],
-    participants: [],
+    participants: [participantsData[0], participantsData[1]],
     date: "2023-03-01",
     startTime: "8:30",
     endTime: "9:30",
@@ -180,7 +249,7 @@ const lessonsData: Lesson[] = [
   {
     id: "wed-2",
     lessonType: lessonTypesData[8],
-    participants: [],
+    participants: [participantsData[2], participantsData[3]],
     date: "2023-03-01",
     startTime: "9:00",
     endTime: "10:00",
@@ -188,7 +257,7 @@ const lessonsData: Lesson[] = [
   {
     id: "wed-3",
     lessonType: lessonTypesData[3],
-    participants: [],
+    participants: [participantsData[4]],
     date: "2023-03-01",
     startTime: "8:00",
     endTime: "9:00",
@@ -196,7 +265,7 @@ const lessonsData: Lesson[] = [
   {
     id: "wed-4",
     lessonType: lessonTypesData[5],
-    participants: [],
+    participants: [participantsData[4]],
     date: "2023-03-01",
     startTime: "9:00",
     endTime: "10:00",
@@ -204,10 +273,34 @@ const lessonsData: Lesson[] = [
   {
     id: "wed-5",
     lessonType: lessonTypesData[2],
-    participants: [],
+    participants: [participantsData[5]],
     date: "2023-03-01",
     startTime: "9:30",
     endTime: "10:30",
+  },
+  {
+    id: "thu-1",
+    lessonType: lessonTypesData[2],
+    participants: [participantsData[5]],
+    date: "2023-03-02",
+    startTime: "10:00",
+    endTime: "11:00",
+  },
+  {
+    id: "thu-1",
+    lessonType: lessonTypesData[5],
+    participants: [participantsData[4]],
+    date: "2023-03-02",
+    startTime: "10:00",
+    endTime: "11:00",
+  },
+  {
+    id: "thu-1",
+    lessonType: lessonTypesData[8],
+    participants: [participantsData[3], participantsData[2]],
+    date: "2023-03-02",
+    startTime: "10:00",
+    endTime: "11:00",
   },
 ];
 
@@ -221,6 +314,7 @@ function dumpLessonToEvent(lesson: Lesson): Event {
     startTime: timeToMinutes(lesson.startTime),
     endTime: timeToMinutes(lesson.endTime),
     coaches: lesson.lessonType.coaches.map((coach) => coach.name as COACHES),
+    label: lesson.participants.map((p) => p.name).join(" + "),
     lessonType: lesson.lessonType.type,
   };
 }
