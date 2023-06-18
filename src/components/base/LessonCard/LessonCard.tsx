@@ -1,11 +1,10 @@
-import { Box, Card, VStack, Text, Flex } from "@chakra-ui/react";
+import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 
 import { COACHES, Position } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
 
 const minHeight = 40;
-const maxWidth = 160;
 
 const colorsMap: Record<COACHES, string> = {
   [COACHES.Vika]: "green.300",
@@ -26,6 +25,9 @@ export type LessonCardProps = {
 export const LessonCard: React.FC<LessonCardProps> = (
   props: LessonCardProps
 ) => {
+  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
+  const maxWidth = isLargerThan600 ? 160 : 80;
+
   const height = props.position.h * 40;
   const width = props.position.w * maxWidth;
   const top = props.position.y * minHeight;
@@ -58,6 +60,14 @@ export const LessonCard: React.FC<LessonCardProps> = (
 
   const colors = getColors();
 
+  const label =
+    width >= maxWidth / 2
+      ? props.label
+      : (props.label || "")
+          .split(" ")
+          .map((l) => l.substring(0, 1))
+          .join(" ");
+
   return (
     <Card
       position="absolute"
@@ -80,10 +90,10 @@ export const LessonCard: React.FC<LessonCardProps> = (
         ))}
       </VStack>
       <Flex direction="column" paddingX={1} overflow="hidden">
-        <Text fontSize="xs" as="span" fontWeight="bold">
-          {props.label || "."}
+        <Text fontSize="xs" as="span" fontWeight="bold" noOfLines={3}>
+          {label}
         </Text>
-        <Text fontSize="xs" as="i">
+        <Text fontSize="xs" as="i" noOfLines={1}>
           {props.lessonType}
         </Text>
       </Flex>

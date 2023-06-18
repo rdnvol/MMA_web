@@ -41,7 +41,7 @@ const RadioCard: React.FC<RadioCardProps> = (props: RadioCardProps) => {
           borderColor: `${colorScheme}.500`,
         }}
         px={5}
-        py={3}
+        py={2}
       >
         {props.children}
       </Box>

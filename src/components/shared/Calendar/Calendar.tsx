@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import {
   HStack,
   Box,
-  StackDivider,
   VStack,
   Circle,
   Flex,
   Grid,
   GridItem,
+  useMediaQuery,
 } from "@chakra-ui/react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   currentWeek,
@@ -24,6 +25,7 @@ import {
   getEventsByDateFromLessons,
   groupLessonsByDate,
   getEventsByDate,
+  DATE_FORMAT,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -36,11 +38,10 @@ import LessonCard from "../../base/LessonCard";
 import { LessonType, LESSON_TYPES } from "../../../models";
 import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
-import CalendarFilter from "./CalendarFilter";
+import CalendarControl from "./CalendarControl";
 import { useGetLessonsQuery } from "../../../services/lessons";
 
 const cakraHeight = 10;
-const cakraWidth = 40;
 
 type FiltersParams = {
   coaches: COACHES[];
@@ -55,17 +56,21 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
+  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
+  const cakraWidth = isLargerThan600 ? 40 : 20;
+
   // const { data: lessonsData } = useGetLessonsQuery("");
 
   // const groupedLessons = groupLessonsByDate(lessonsData || []);
 
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
+  const [searchParams] = useSearchParams();
 
-  const search = (searchFilters: { coaches: string[] }) => {
-    setFilters({
-      coaches: searchFilters.coaches as COACHES[],
-    });
-  };
+  useEffect(() => {
+    const coaches = searchParams.getAll("coaches") as COACHES[];
+
+    setFilters({ coaches });
+  }, [searchParams]);
 
   const renderHeader = (header: string | Date) => (
     <Flex h={cakraHeight} alignItems="center" gap={2}>
@@ -87,7 +92,16 @@ export const Calendar: React.FC = () => {
   );
 
   const renderTime = (time: string = "") => (
-    <Box key={time} w="50px" h={cakraHeight}>
+    <Box
+      key={time}
+      w="full"
+      h={cakraHeight}
+      borderColor="gray.200"
+      borderTopWidth={1}
+      borderRightWidth={1}
+      textAlign="right"
+      p="1"
+    >
       {time}
     </Box>
   );
@@ -119,6 +133,7 @@ export const Calendar: React.FC = () => {
           w={cakraWidth}
           h={cakraHeight * timeData.length}
         >
+          {timeData.map(() => renderTime())}
           {positionedEvents.map(renderLesson)}
           {freeSlots.map(renderEmptySlot)}
         </Box>
@@ -197,7 +212,7 @@ export const Calendar: React.FC = () => {
       id: nanoid(8),
       lessonType: selectedLessonType,
       participants: [],
-      date: format(selectedFreeSlot.date, "yyyy-MM-dd"),
+      date: format(selectedFreeSlot.date, DATE_FORMAT),
       startTime: minutesToTime(selectedFreeSlot.startTime),
       endTime: minutesToTime(selectedFreeSlot.endTime),
       label,
@@ -214,38 +229,40 @@ export const Calendar: React.FC = () => {
 
   return (
     <Grid
-      templateAreas={`"nav calendar form"`}
-      gridTemplateRows={"1fr"}
-      gridTemplateColumns={"150px 1fr 300px"}
+      templateAreas={`"control"
+                      "calendar"`}
+      gridTemplateRows={"60px 1fr"}
+      gridTemplateColumns={"1fr"}
       h="100vh"
       overflowY="hidden"
       gap="1"
       color="blackAlpha.700"
     >
-      <GridItem pl="2" area={"nav"} boxShadow="md">
-        <CalendarFilter onSearch={search} />
+      <GridItem pl="2" area={"control"} boxShadow="md" overflow="hidden">
+        <CalendarControl />
       </GridItem>
-      <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
-        <HStack
-          spacing={0}
-          divider={<StackDivider borderColor="gray.200" />}
-          alignItems="flex-start"
-        >
-          <VStack spacing={0} divider={<StackDivider borderColor="gray.200" />}>
+
+      <GridItem
+        area={"calendar"}
+        overflowX="scroll"
+        h="100%"
+        paddingBottom={50}
+      >
+        <HStack spacing={0} alignItems="flex-start" position="relative">
+          <VStack spacing={0} position="sticky" zIndex={2}>
             {renderHeader("Time")}
             {timeData.map(renderTime)}
           </VStack>
           {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
-      <GridItem pl="2" area={"form"} boxShadow="md">
-        <CreateLessonForm
-          selectedFreeSlot={selectedFreeSlot}
-          onShowFreeSlots={showFreeSlots}
-          onSubmit={submitCreateLesson}
-          onCancel={cancelCreateLesson}
-        />
-      </GridItem>
+
+      <CreateLessonForm
+        selectedFreeSlot={selectedFreeSlot}
+        onShowFreeSlots={showFreeSlots}
+        onSubmit={submitCreateLesson}
+        onCancel={cancelCreateLesson}
+      />
     </Grid>
   );
 };

@@ -1,10 +1,9 @@
-import { Card, Skeleton } from "@chakra-ui/react";
+import { Card, Skeleton, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 
 import { Position } from "../../../constants/data";
 
 const minHeight = 40;
-const maxWidth = 160;
 
 export type EmptySlotCardProps = {
   position: Position;
@@ -15,6 +14,9 @@ export type EmptySlotCardProps = {
 export const EmptySlotCard: React.FC<EmptySlotCardProps> = (
   props: EmptySlotCardProps
 ) => {
+  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
+  const maxWidth = isLargerThan600 ? 160 : 80;
+
   const height = props.position.h * 40;
   const width = props.position.w * maxWidth;
   const top = props.position.y * minHeight;
