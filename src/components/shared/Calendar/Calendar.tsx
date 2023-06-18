@@ -26,6 +26,7 @@ import {
   getEventsByDateFromLessons,
   groupLessonsByDate,
   getEventsByDate,
+  getEventByLessonId,
   DATE_FORMAT,
 } from "../../../constants/data";
 import {
@@ -42,6 +43,7 @@ import EmptySlotCard from "../../base/EmptySlotCard";
 import TimeBox from "../../base/TimeBox";
 import CalendarControl from "./CalendarControl";
 import CreateLessonForm from "../CreateLessonForm";
+import DeleteLessonModal from "./DeleteLessonModal";
 
 const cakraHeight = 10;
 
@@ -50,6 +52,9 @@ type FiltersParams = {
 };
 
 export const Calendar: React.FC = () => {
+  const [selectedLessonId, setSelectedLessonId] = useState<
+    string | undefined
+  >();
   const [selectedLessonType, setSelectedLessonType] = useState<
     LessonType | undefined
   >();
@@ -141,6 +146,7 @@ export const Calendar: React.FC = () => {
         isFloating={positionedEvent.isFloating}
         orderedCoaches={positionedEvent.orderedCoaches}
         selectedCoaches={filters.coaches}
+        onClick={() => setSelectedLessonId(positionedEvent.id)}
       />
     );
   };
@@ -253,6 +259,12 @@ export const Calendar: React.FC = () => {
         onShowFreeSlots={showFreeSlots}
         onSubmit={submitCreateLesson}
         onCancel={cancelCreateLesson}
+      />
+
+      <DeleteLessonModal
+        event={getEventByLessonId(selectedLessonId)}
+        isOpen={!!selectedLessonId}
+        onCancel={() => setSelectedLessonId(undefined)}
       />
     </Grid>
   );

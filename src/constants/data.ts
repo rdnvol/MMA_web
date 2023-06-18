@@ -457,6 +457,12 @@ export function getEventsByDate(date: Date): Event[] {
   return (calendarData[formattedDate] || []).map(dumpLessonToEvent);
 }
 
+export function getEventByLessonId(lessonId?: string): Event | undefined {
+  const lesson = lessonsData.find((l) => l.id === lessonId);
+
+  return lesson ? dumpLessonToEvent(lesson) : undefined;
+}
+
 export function getEventsByDateFromLessons(
   date: Date,
   lessons: Record<string, Lesson[]>
