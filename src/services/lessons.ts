@@ -27,4 +27,3 @@ export const lessonsApi = createApi({
 // auto-generated based on the defined endpoints
 export const { useGetLessonsQuery } = lessonsApi;
 export const createLesson = api.lessons.create.bind(api.lessons);
-export const deleteLesson = api.lessons.delete.bind(api.lessons);

@@ -3,12 +3,12 @@ import { Grid, GridItem } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 
 import { PositionedEvent, Event, getDateRange } from "../../../constants/data";
-import { useGetLessonsQuery, deleteLesson } from "../../../services/lessons";
+import { useGetLessonsQuery } from "../../../services/lessons";
 import { LessonType } from "../../../models";
 
 import CalendarControl from "./CalendarControl";
 import CreateLessonForm from "../CreateLessonForm";
-import DeleteLessonModal from "./DeleteLessonModal";
+import LessonProfileModal from "./LessonProfileModal";
 import CalendarTable from "./CalendarTable";
 import config from "../../../config";
 
@@ -57,13 +57,7 @@ export const Calendar: React.FC = () => {
     setSelectedFreeSlot(undefined);
   };
 
-  const submitDeleteLesson = async (lessonId: number) => {
-    cancelDeleteLesson();
-    await deleteLesson(lessonId);
-    refetchLessons();
-  };
-
-  const cancelDeleteLesson = async () => {
+  const closeLessonProfileModal = () => {
     setSelectedEvent(undefined);
   };
 
@@ -106,11 +100,11 @@ export const Calendar: React.FC = () => {
         onCancel={cancelCreateLesson}
       />
 
-      <DeleteLessonModal
-        event={selectedEvent}
+      <LessonProfileModal
+        lessonId={selectedEvent?.id}
         isOpen={!!selectedEvent}
-        onSubmit={submitDeleteLesson}
-        onCancel={cancelDeleteLesson}
+        onChange={refetchLessons}
+        onClose={closeLessonProfileModal}
       />
     </Grid>
   );

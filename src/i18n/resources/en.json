@@ -9,8 +9,10 @@
     "Manual": "Manual",
     "Name": "Name",
     "Show free slots": "Show free slots",
-    "Delete lesson?": "Delete lesson?",
-    "Time": "Time"
+    "Lesson profile": "Lesson profile",
+    "Time": "Time",
+    "Ok": "Ok",
+    "Decline lesson": "Decline lesson"
   },
   "lessonType": {
     "personal": "personal",

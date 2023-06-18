@@ -10,8 +10,10 @@
     "Manual": "Вручну",
     "Name": "Назва",
     "Show free slots": "Показати вільні",
-    "Delete lesson?": "Видалити урок?",
-    "Time": "Час"
+    "Lesson profile": "Профайл уроку",
+    "Time": "Час",
+    "Ok": "Добре",
+    "Decline lesson": "Скасувати урок"
   },
   "lessonType": {
     "personal": "персонально",

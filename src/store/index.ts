@@ -3,12 +3,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import { coachesApi } from "../services/coaches";
 import { lessonTypesApi } from "../services/lessonTypes";
 import { lessonsApi } from "../services/lessons";
+import { lessonApi } from "../services/lesson";
 
 export const store = configureStore({
   reducer: {
     [coachesApi.reducerPath]: coachesApi.reducer,
     [lessonTypesApi.reducerPath]: lessonTypesApi.reducer,
     [lessonsApi.reducerPath]: lessonsApi.reducer,
+    [lessonApi.reducerPath]: lessonApi.reducer,
   },
   // Adding the api middleware enables caching, invalidation, polling,
   // and other useful features of `rtk-query`.
@@ -16,7 +18,8 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       coachesApi.middleware,
       lessonTypesApi.middleware,
-      lessonsApi.middleware
+      lessonsApi.middleware,
+      lessonApi.middleware
     ),
 });
 
