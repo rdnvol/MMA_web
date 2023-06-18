@@ -50,7 +50,14 @@ const RadioCard: React.FC<RadioCardProps> = (props: RadioCardProps) => {
 };
 
 export type RadioGroupProps = {
-  options: string[];
+  options:
+    | string[]
+    | {
+        value: string;
+        label?: string;
+        colorScheme?: string;
+        isDisabled?: boolean;
+      }[];
   value?: string;
   onChange?: (value: string) => void;
   colorScheme?: string;
@@ -71,17 +78,27 @@ export const RadioGroup: React.FC<RadioGroupProps> = (
 
   return (
     <Flex {...group} gap={2} direction="row" flexWrap="wrap">
-      {props.options.map((value) => {
+      {props.options.map((option) => {
+        const label =
+          typeof option === "string" ? option : option.label || option.value;
+        const value = typeof option === "string" ? option : option.value;
+        const colorScheme =
+          typeof option === "string" || !option.colorScheme
+            ? props.colorScheme
+            : option.colorScheme;
+        const isDisabled =
+          typeof option === "string" ? props.isDisabled : option.isDisabled;
+
         const radio = getRadioProps({ value });
 
         return (
           <RadioCard
             key={value}
             {...radio}
-            colorScheme={props.colorScheme}
-            isDisabled={props.isDisabled}
+            colorScheme={colorScheme}
+            isDisabled={isDisabled}
           >
-            {value}
+            {label}
           </RadioCard>
         );
       })}

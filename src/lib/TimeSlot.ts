@@ -1,4 +1,6 @@
 import { COACHES, Event } from "../constants/data";
+import { Coach } from "../models";
+import arrayToMap from "../utils/arrayToMap";
 import { Meeting } from "../utils/calendar";
 import TimeSlotsMap from "./TimeSlotsMap";
 
@@ -22,20 +24,20 @@ export default class TimeSlot {
   }
 
   addEvent(event: Event) {
-    if (event.orderedCoaches && event.orderedCoaches.length > 1) {
+    if (event.coachOrder && event.coachOrder.length > 1) {
       const events = splitOrderedEvent(event).filter((event) =>
         isCoveringBounds(this.getBounds(), [event.startTime, event.endTime])
       );
 
       events.forEach((event) =>
-        this._addEventForCoach(event.coaches[0], event)
+        this._addEventForCoach(event.coaches[0].id, event)
       );
     } else {
-      event.coaches.forEach((coach) => this._addEventForCoach(coach, event));
+      event.coaches.forEach((coach) => this._addEventForCoach(coach.id, event));
     }
   }
 
-  _addEventForCoach(coach: string, event: Event) {
+  _addEventForCoach(coach: number, event: Event) {
     if (!this.coachToBusiness[coach]) {
       this.coachToBusiness[coach] = {
         floating: [],
@@ -205,17 +207,19 @@ function isCrossBounds(boundsA: Meeting, boundsB: Meeting): boolean {
 }
 
 function splitOrderedEvent(event: Event): Event[] {
-  const { startTime, endTime, orderedCoaches } = event;
+  const { startTime, endTime, coachOrder } = event;
 
-  if (!orderedCoaches || !orderedCoaches.length) {
+  if (!coachOrder || !coachOrder.length) {
     return [event];
   }
 
-  const orderDuration = (endTime - startTime) / orderedCoaches.length;
+  const orderDuration = (endTime - startTime) / coachOrder.length;
 
-  return orderedCoaches.map((coach, index) => ({
+  const coachesMap = arrayToMap<Coach>(event.coaches);
+
+  return coachOrder.map((coachId, index) => ({
     ...event,
-    coaches: [coach],
+    coaches: [coachesMap[coachId]],
     startTime: startTime + index * orderDuration,
     endTime: startTime + (index + 1) * orderDuration,
   }));

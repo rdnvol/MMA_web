@@ -2,7 +2,8 @@ import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 
 import { COACHES, Position } from "../../../constants/data";
-import { LESSON_TYPES } from "../../../models";
+import { Coach, LessonType, LESSON_TYPES } from "../../../models";
+import arrayToMap from "../../../utils/arrayToMap";
 
 const minHeight = 40;
 
@@ -14,12 +15,12 @@ const colorsMap: Record<COACHES, string> = {
 
 export type LessonCardProps = {
   label?: string;
-  coaches: COACHES[];
-  orderedCoaches?: COACHES[];
+  coaches: Coach[];
+  coachOrder?: number[];
   position: Position;
-  lessonType?: LESSON_TYPES;
+  lessonType?: LessonType;
   isFloating?: boolean;
-  selectedCoaches?: COACHES[];
+  selectedCoaches?: number[];
   onClick?: () => void;
 };
 
@@ -35,19 +36,23 @@ export const LessonCard: React.FC<LessonCardProps> = (
   const left = props.position.x * maxWidth;
 
   const getColors = () => {
-    const coaches = !!props.orderedCoaches?.length
-      ? props.orderedCoaches
+    const coachesMap = arrayToMap<Coach>(props.coaches);
+
+    const coaches: Coach[] = !!props.coachOrder?.length
+      ? props.coachOrder.map((c) => coachesMap[c])
       : props.coaches;
 
     let colors = [colorsMap[COACHES.Empty]];
 
-    if (coaches.length && props.lessonType !== LESSON_TYPES.OTHER) {
+    if (coaches.length && props.lessonType?.type !== LESSON_TYPES.Other) {
       colors = coaches.map((coach) => {
         const isSelected =
           !props.selectedCoaches?.length ||
-          props.selectedCoaches.find((c) => c === coach);
+          props.selectedCoaches.find((c) => c === coach.id);
 
-        return isSelected ? colorsMap[coach] : colorsMap[COACHES.Empty];
+        return isSelected
+          ? colorsMap[coach.name as COACHES]
+          : colorsMap[COACHES.Empty];
       });
     }
 
@@ -96,7 +101,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
           {label}
         </Text>
         <Text fontSize="xs" as="i" noOfLines={1}>
-          {props.lessonType}
+          {props.lessonType?.type}
         </Text>
       </Flex>
     </Card>

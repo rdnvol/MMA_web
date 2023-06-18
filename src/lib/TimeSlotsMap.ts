@@ -65,7 +65,7 @@ export default class TimeSlotsMap {
       (coach) => coach.name as COACHES
     );
     const isFloating = lessonType.coaches.length > 1;
-    const isHalfTime = lessonType.coachBusyLevel === BUSY_LEVELS.HALF;
+    const isHalfTime = lessonType.coachBusyLevel === BUSY_LEVELS.Half;
 
     for (const timeSlot of Object.values(this.timeSlots)) {
       let isAvailable = true;

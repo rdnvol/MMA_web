@@ -51,6 +51,17 @@ export function minutesToTime(minutes: number): string {
   return `${hours}:${min}`;
 }
 
+export function mergeDateAndMinutes(date: Date, minutes: number): Date {
+  const newDate = new Date(date);
+
+  const hours = Math.floor(minutes / 60);
+  const min = minutes % 60;
+
+  newDate.setHours(hours, min, 0, 0);
+
+  return newDate;
+}
+
 export function getPositionedEvents(
   events: Event[],
   dailyBounds: [number, number],
@@ -78,17 +89,6 @@ export function getPositionedEvents(
   }));
 }
 
-export function filterEventsByCoaches(
-  events: Event[],
-  coaches: COACHES[]
-): Event[] {
-  return coaches.length
-    ? events.filter((event: Event) =>
-        event.coaches.some((coach) => coaches.includes(coach))
-      )
-    : events;
-}
-
 export function getFreeSlots(
   events: Event[],
   lessonType: LessonType,
@@ -103,16 +103,18 @@ export function getFreeSlots(
   const availableTimeSlots: TimeSlot[] =
     timeSlotsMap.getAvailableTimeSlots(lessonType);
 
-  return availableTimeSlots.map((timeSlot: TimeSlot) => {
+  return availableTimeSlots.map((timeSlot: TimeSlot, index: number) => {
     const startTime = timeSlot.startTime;
     const endTime = timeSlot.startTime + timeSlot.duration;
 
     return {
-      id: "free-item",
+      id: index,
       coaches: [],
       date,
       startTime,
       endTime,
+      lessonType,
+      label: "",
       position: {
         x: 0,
         y: (startTime - dailyBounds[0]) / slotDuration,

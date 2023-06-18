@@ -9,7 +9,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { COACHES, coachesData } from "../../../constants/data";
+import { COACHES } from "../../../constants/data";
 import { Coach } from "../../../models";
 import { useGetCoachesQuery } from "../../../services/coaches";
 // import RadioGroup from "../../base/RadioGroup/RadioGroup";
@@ -27,11 +27,9 @@ type View = "1" | "3" | "7";
 export const CalendarControl: React.FC<CalendarControlProps> = () => {
   const [, setSearchParams] = useSearchParams();
 
-  // const { data: coachesData } = useGetCoachesQuery("");
+  const { data: coachesData = [] } = useGetCoachesQuery("");
 
-  const [coaches, setCoaches] = useState<string[]>(
-    coachesData.map((c) => c.name)
-  );
+  const [coaches, setCoaches] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<View>("7");
 
@@ -45,8 +43,12 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
     });
   }, [selectedDate, view, coaches, setSearchParams]);
 
-  const updateCoaches = (value: Array<string | number>) => {
-    setCoaches(value as string[]);
+  useEffect(() => {
+    setCoaches(coachesData.map((coach) => String(coach.id)));
+  }, [coachesData]);
+
+  const updateCoaches = (value: Array<string>) => {
+    setCoaches(value);
   };
 
   const updateView = (value: string) => {
@@ -71,7 +73,7 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
             {coachesData.map((coach) => (
               <Checkbox
                 key={coach.id}
-                value={coach.name}
+                value={String(coach.id)}
                 colorScheme={getCoachColorScheme(coach)}
               >
                 {coach.name}

@@ -6,7 +6,7 @@ function compareEvents(eventA: Event, eventB: Event): number {
   return 0;
 }
 
-type Matrix = string[][];
+type Matrix = number[][];
 
 class MatrixPosition {
   constructor(
@@ -52,22 +52,22 @@ class PositionsMatrix {
   constructor(
     public matrixHeight: number,
     public matrixWidth: number = 1,
-    public map: Record<string, MatrixPosition> = {},
+    public map: Record<number, MatrixPosition> = {},
     private _matrix: Matrix = []
   ) {
     this._refreshMatrix();
   }
 
-  get(key: string): MatrixPosition {
+  get(key: number): MatrixPosition {
     return this.map[key];
   }
 
-  delete(key: string): void {
+  delete(key: number): void {
     delete this.map[key];
     this._refreshMatrix();
   }
 
-  set(key: string, position: MatrixPosition) {
+  set(key: number, position: MatrixPosition) {
     this.map[key] = position;
     this._refreshMatrix();
   }
@@ -86,7 +86,7 @@ class PositionsMatrix {
     for (const [key, position] of Object.entries(this.map)) {
       for (let i = position.x1; i <= position.x2; i++) {
         for (let j = position.y1; j <= position.y2; j++) {
-          matrix[i][j] = key;
+          matrix[i][j] = +key;
         }
       }
     }
@@ -97,7 +97,7 @@ class PositionsMatrix {
   _fillMatrix(value: string, position: MatrixPosition) {
     for (let i = position.x1; i <= position.x2; i++) {
       for (let j = position.y1; j <= position.y2; j++) {
-        this._matrix[i][j] = value;
+        this._matrix[i][j] = +value;
       }
     }
   }
@@ -106,7 +106,7 @@ class PositionsMatrix {
     return this._matrix;
   }
 
-  getConflicts(position: MatrixPosition): string[] {
+  getConflicts(position: MatrixPosition): number[] {
     const conflicts = [];
     const matrix: Matrix = this._matrix;
 
@@ -136,7 +136,7 @@ class PositionsMatrix {
     }
 
     for (let i = this.matrixWidth - 2; i >= 0; i--) {
-      let keys: Record<string, true> = {};
+      let keys: Record<number, true> = {};
 
       for (let j = 0; j < this.matrixHeight; j++) {
         if (!!this._matrix[i][j]) {
@@ -145,9 +145,9 @@ class PositionsMatrix {
       }
 
       for (const key of Object.keys(keys)) {
-        let position = this.get(key);
+        let position = this.get(+key);
 
-        this.delete(key);
+        this.delete(+key);
 
         let testPosition = position.copy();
 
@@ -161,7 +161,7 @@ class PositionsMatrix {
           testPosition.addWidth();
         }
 
-        this.set(key, position);
+        this.set(+key, position);
       }
     }
   }

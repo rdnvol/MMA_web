@@ -23,7 +23,7 @@ type DeleteLessonModalProps = {
   event?: Event;
   isOpen?: boolean;
   onCancel?: () => void;
-  onSubmit?: () => void;
+  onSubmit?: (lessonId: number) => void;
 };
 
 const colorScheme = "orange";
@@ -34,6 +34,14 @@ export const DeleteLessonModal: React.FC<DeleteLessonModalProps> = ({
   onCancel = () => {},
   onSubmit = () => {},
 }) => {
+  const submit = () => {
+    if (!event) {
+      return;
+    }
+
+    onSubmit(event.id);
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onCancel}>
       <ModalOverlay />
@@ -48,9 +56,9 @@ export const DeleteLessonModal: React.FC<DeleteLessonModalProps> = ({
               )} - ${minutesToTime(event.endTime)}`}
           </Text>
           <Flex flexDirection="row" gap="3">
-            <Text>{event?.coaches.join(", ")}</Text>
+            <Text>{event?.coaches.map((coach) => coach.name).join(", ")}</Text>
             <Tag size="sm" variant="outline" colorScheme={colorScheme}>
-              <TagLabel>{event?.lessonType}</TagLabel>
+              <TagLabel>{event?.lessonType.type}</TagLabel>
             </Tag>
           </Flex>
           <Heading size="sm">{event?.label}</Heading>
@@ -60,7 +68,7 @@ export const DeleteLessonModal: React.FC<DeleteLessonModalProps> = ({
           <Button variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
-          <Button colorScheme="red" mr={3} onClick={onSubmit}>
+          <Button colorScheme="red" mr={3} onClick={submit}>
             Delete
           </Button>
         </ModalFooter>

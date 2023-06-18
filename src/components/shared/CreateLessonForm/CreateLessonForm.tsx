@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FormControl,
   FormLabel,
@@ -17,27 +17,27 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { FaChevronUp, FaChevronDown, FaPlus, FaTimes } from "react-icons/fa";
-import { COACHES, coachesData, Event } from "../../../constants/data";
-import { LESSON_TYPES } from "../../../models";
+import { dumpEventToLesson, Event } from "../../../constants/data";
+import { LessonType, LESSON_TYPES } from "../../../models";
 import RadioGroup from "../../base/RadioGroup/RadioGroup";
 import CheckboxGroup from "../../base/CheckboxGroup/CheckboxGroup";
 import { format } from "date-fns";
 import { minutesToTime } from "../../../utils/calendar";
+import { useGetCoachesQuery } from "../../../services/coaches";
+import { useGetLessonTypesQuery } from "../../../services/lessonTypes";
+import { createLesson } from "../../../services/lessons";
 
 const lessonOptions: LESSON_TYPES[] = [
-  LESSON_TYPES.PERSONAL,
-  LESSON_TYPES.SPLIT,
-  LESSON_TYPES.GROUP,
-  LESSON_TYPES.MASSAGE,
-  LESSON_TYPES.OTHER,
+  LESSON_TYPES.Personal,
+  LESSON_TYPES.Group,
+  LESSON_TYPES.Split,
+  LESSON_TYPES.Massage,
+  LESSON_TYPES.Other,
 ];
-const singleCoachLessonTypes: LESSON_TYPES[] = [
-  LESSON_TYPES.SPLIT,
-  LESSON_TYPES.MASSAGE,
-];
-const coachesOptions = coachesData.map((coach) => coach.name);
+
+type LessonTypesMap = Record<string, LessonType>;
+
 const durationOptions = ["30", "60"];
-const defaultCoaches: COACHES[] = [COACHES.Sasha, COACHES.Vika];
 const colorScheme = "orange";
 
 enum VIEWS {
@@ -48,12 +48,8 @@ enum VIEWS {
 }
 
 export type CreateLessonFormProps = {
-  onShowFreeSlots: (
-    lessonType: LESSON_TYPES,
-    coaches: COACHES[],
-    duration: number
-  ) => void;
-  onSubmit: (label: string) => void;
+  onShowFreeSlots: (lessonType: LessonType, duration: number) => void;
+  onSubmit: () => void;
   onCancel: () => void;
   selectedFreeSlot?: Event;
 };
@@ -64,30 +60,49 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [view, setView] = useState<VIEWS>(VIEWS.NONE);
-  const [selectedLessonType, setSelectedLessonType] = useState<LESSON_TYPES>(
-    LESSON_TYPES.PERSONAL
-  );
-  const [selectedCoaches, setSelectedCoaches] =
-    useState<COACHES[]>(defaultCoaches);
+  const { data: coachesData = [] } = useGetCoachesQuery("");
+  const { data: lessonTypesData = [] } = useGetLessonTypesQuery("");
 
-  const [selectedDuration, setSelectedDuration] = useState<string>(
-    durationOptions[1]
-  );
-  const [areFreeSlotsRequested, setAreFreeSlotsRequested] = useState(false);
+  const [view, setView] = useState<VIEWS>(VIEWS.NONE);
+
+  const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
+  const [selectedLessonType, setSelectedLessonType] = useState<
+    LESSON_TYPES | undefined
+  >();
+  const [selectedDuration] = useState<string>(durationOptions[1]);
   const [label, setLabel] = useState<string>("");
 
   const [isLargerThan500] = useMediaQuery("(min-width: 500px)");
 
-  const changeSelectedCoaches = (value: string[]) => {
-    if (
-      singleCoachLessonTypes.includes(selectedLessonType) &&
-      value.length > 1
-    ) {
-      return;
-    }
+  const lessonTypesMap: LessonTypesMap = useMemo(() => {
+    return getLessonTypesMap(lessonTypesData, selectedCoaches);
+  }, [lessonTypesData, selectedCoaches]);
 
-    setSelectedCoaches(value as COACHES[]);
+  useEffect(() => {
+    setSelectedLessonType(undefined);
+  }, [selectedCoaches.length]);
+
+  useEffect(() => {
+    if (!!selectedFreeSlot) {
+      setView(VIEWS.ADD_PARTICIPANTS);
+    }
+  }, [selectedFreeSlot]);
+
+  const coachesOptions = coachesData.map((coach) => ({
+    value: coach.id,
+    label: coach.name,
+  }));
+
+  const lessonTypesOptions = lessonOptions.map((option) => {
+    return {
+      isDisabled: !lessonTypesMap[option],
+      value: option,
+      label: option,
+    };
+  });
+
+  const changeSelectedCoaches = (value: string[]) => {
+    setSelectedCoaches(value.map((v) => +v));
   };
 
   const changeSelectedLessonType = (value: string) => {
@@ -95,31 +110,40 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   };
 
   const showFreeSlots = (e: any) => {
-    if (selectedCoaches.length) {
-      onShowFreeSlots(
-        selectedLessonType as LESSON_TYPES,
-        selectedCoaches as COACHES[],
-        +selectedDuration
-      );
-      setAreFreeSlotsRequested(true);
+    if (selectedLessonType) {
+      onShowFreeSlots(lessonTypesMap[selectedLessonType], +selectedDuration);
       setView(VIEWS.SELECT_FREES_SLOT);
     }
   };
 
-  const submitForm = (e: any) => {
+  const submitForm = async (e: any) => {
     e.preventDefault();
+
+    if (!selectedFreeSlot) {
+      return;
+    }
+
+    const lessonToCreate = dumpEventToLesson(selectedFreeSlot);
+
+    await createLesson({
+      lessonTypeId: lessonToCreate.lessonType.id,
+      startDate: lessonToCreate.startDate,
+      endDate: lessonToCreate.endDate,
+      name: label,
+    });
+
     resetForm(e);
-    onSubmit(label);
+    onSubmit();
   };
 
   const resetForm = (e?: any) => {
     e?.preventDefault();
-    setSelectedLessonType(lessonOptions[0]);
-    changeSelectedCoaches([]);
+    setSelectedLessonType(undefined);
+    setSelectedCoaches([]);
     setLabel("");
-    setSelectedDuration(durationOptions[1]);
-    setAreFreeSlotsRequested(false);
+
     onCancel();
+
     setView(VIEWS.NONE);
   };
 
@@ -181,7 +205,10 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               <TagLabel>{selectedLessonType}</TagLabel>
             </Tag>
             <Heading size="sm" noOfLines={1}>
-              {selectedCoaches.join(", ")}
+              {selectedLessonType &&
+                lessonTypesMap[selectedLessonType].coaches
+                  .map((coach) => coach.name)
+                  .join(", ")}
             </Heading>
             <Text noOfLines={1}>
               {selectedFreeSlot &&
@@ -223,18 +250,18 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               value={selectedCoaches}
               onChange={changeSelectedCoaches}
               colorScheme={colorScheme}
-              isDisabled={areFreeSlotsRequested}
             />
           </FormControl>
 
           <FormControl>
             <FormLabel>Type</FormLabel>
             <RadioGroup
-              options={lessonOptions}
+              // TODO: Find better solution
+              key={selectedCoaches.length}
+              options={lessonTypesOptions}
               value={selectedLessonType}
               onChange={changeSelectedLessonType}
               colorScheme={colorScheme}
-              isDisabled={areFreeSlotsRequested}
             />
           </FormControl>
 
@@ -245,7 +272,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             <Button
               colorScheme={colorScheme}
               onClick={showFreeSlots}
-              isDisabled={selectedCoaches.length === 0}
+              isDisabled={selectedCoaches.length === 0 || !selectedLessonType}
             >
               Show free slots
             </Button>
@@ -307,6 +334,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
 export default CreateLessonForm;
 
+// Utils
 function getHeight(view: VIEWS, isLargerThan500: boolean): number {
   if (view === VIEWS.SELECT_COACH && isLargerThan500) {
     return 276;
@@ -321,4 +349,37 @@ function getHeight(view: VIEWS, isLargerThan500: boolean): number {
   }
 
   return 50;
+}
+
+function filterLessonTypesByCoaches(
+  lessonTypes: LessonType[],
+  selectedCoaches: number[]
+): LessonType[] {
+  const filteredLessonTypes = lessonTypes.filter(
+    (lessonType) =>
+      lessonType.coaches.length === selectedCoaches.length &&
+      selectedCoaches.every(
+        (coachId) => !!lessonType.coaches.find((coach) => coach.id === coachId)
+      )
+  );
+
+  return filteredLessonTypes;
+}
+
+function getLessonTypesMap(
+  lessonTypes: LessonType[],
+  selectedCoaches: number[]
+): LessonTypesMap {
+  const filteredLessonTypes = filterLessonTypesByCoaches(
+    lessonTypes,
+    selectedCoaches
+  );
+
+  return filteredLessonTypes.reduce(
+    (result, lessonType) => ({
+      ...result,
+      [lessonType.type]: lessonType,
+    }),
+    {}
+  );
 }

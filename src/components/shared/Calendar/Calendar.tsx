@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { nanoid } from "nanoid";
 import {
   HStack,
   Box,
@@ -19,24 +18,12 @@ import {
   PositionedEvent,
   dailyBounds,
   slotDuration,
-  COACHES,
-  lessonTypesData,
-  addLesson,
-  updateCoachesOrder,
   getEventsByDateFromLessons,
-  groupLessonsByDate,
-  getEventsByDate,
-  getEventByLessonId,
-  DATE_FORMAT,
+  Event,
 } from "../../../constants/data";
-import {
-  getPositionedEvents,
-  getFreeSlots,
-  minutesToTime,
-  filterEventsByCoaches,
-} from "../../../utils/calendar";
-import { useGetLessonsQuery } from "../../../services/lessons";
-import { LessonType, LESSON_TYPES } from "../../../models";
+import { getPositionedEvents, getFreeSlots } from "../../../utils/calendar";
+import { useGetLessonsQuery, deleteLesson } from "../../../services/lessons";
+import { LessonType } from "../../../models";
 
 import LessonCard from "../../base/LessonCard";
 import EmptySlotCard from "../../base/EmptySlotCard";
@@ -48,13 +35,11 @@ import DeleteLessonModal from "./DeleteLessonModal";
 const cakraHeight = 10;
 
 type FiltersParams = {
-  coaches: COACHES[];
+  coaches: number[];
 };
 
 export const Calendar: React.FC = () => {
-  const [selectedLessonId, setSelectedLessonId] = useState<
-    string | undefined
-  >();
+  const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
   const [selectedLessonType, setSelectedLessonType] = useState<
     LessonType | undefined
   >();
@@ -66,15 +51,14 @@ export const Calendar: React.FC = () => {
   const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
   const cakraWidth = isLargerThan600 ? 40 : 20;
 
-  // const { data: lessonsData } = useGetLessonsQuery("");
-
-  // const groupedLessons = groupLessonsByDate(lessonsData || []);
-
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
   const [searchParams] = useSearchParams();
 
+  const { data: lessonsData = {}, refetch: refetchLessons } =
+    useGetLessonsQuery("");
+
   useEffect(() => {
-    const coaches = searchParams.getAll("coaches") as COACHES[];
+    const coaches = searchParams.getAll("coaches").map((coachId) => +coachId);
 
     setFilters({ coaches });
   }, [searchParams]);
@@ -99,11 +83,9 @@ export const Calendar: React.FC = () => {
   );
 
   const renderDateColumn = (date: Date) => {
-    // const eventsByDate = getEventsByDateFromLessons(date, groupedLessons);
-    const eventsByDate = getEventsByDate(date);
-    const filteredEvents = filterEventsByCoaches(eventsByDate, filters.coaches);
+    const eventsByDate = getEventsByDateFromLessons(date, lessonsData);
     const positionedEvents = getPositionedEvents(
-      filteredEvents,
+      eventsByDate,
       dailyBounds,
       slotDuration
     );
@@ -144,9 +126,9 @@ export const Calendar: React.FC = () => {
         label={positionedEvent.label}
         lessonType={positionedEvent.lessonType}
         isFloating={positionedEvent.isFloating}
-        orderedCoaches={positionedEvent.orderedCoaches}
+        coachOrder={positionedEvent.coachOrder}
         selectedCoaches={filters.coaches}
-        onClick={() => setSelectedLessonId(positionedEvent.id)}
+        onClick={() => setSelectedEvent(positionedEvent)}
       />
     );
   };
@@ -166,54 +148,15 @@ export const Calendar: React.FC = () => {
     );
   };
 
-  const showFreeSlots = (
-    lessonType: LESSON_TYPES,
-    coaches: COACHES[],
-    duration: number
-  ): void => {
-    const type = lessonTypesData
-      .filter((lt) => lt.type === lessonType)
-      .find((lt) =>
-        coaches.every((coach) => lt.coaches.find((c) => c.name === coach))
-      );
-
-    if (type) {
-      setSelectedLessonType(type);
-      setSelectedDuration(duration);
-      setSelectedFreeSlot(undefined);
-    }
+  const showFreeSlots = (lessonType: LessonType, duration: number): void => {
+    setSelectedLessonType(lessonType);
+    setSelectedDuration(duration);
+    setSelectedFreeSlot(undefined);
   };
 
-  const submitCreateLesson = (label: string) => {
-    if (!selectedFreeSlot || !selectedLessonType) {
-      return;
-    }
-
-    if (selectedLessonType.coaches.length === 1) {
-      const timeBounds: [number, number] = [
-        selectedFreeSlot.startTime,
-        selectedFreeSlot.endTime,
-      ];
-
-      updateCoachesOrder(
-        selectedFreeSlot.date,
-        selectedLessonType.coaches[0],
-        timeBounds,
-        selectedLessonType.type
-      );
-    }
-
-    addLesson({
-      id: nanoid(8),
-      lessonType: selectedLessonType,
-      participants: [],
-      date: format(selectedFreeSlot.date, DATE_FORMAT),
-      startTime: minutesToTime(selectedFreeSlot.startTime),
-      endTime: minutesToTime(selectedFreeSlot.endTime),
-      label,
-    });
-
+  const submitCreateLesson = () => {
     cancelCreateLesson();
+    refetchLessons();
   };
 
   const cancelCreateLesson = () => {
@@ -262,9 +205,13 @@ export const Calendar: React.FC = () => {
       />
 
       <DeleteLessonModal
-        event={getEventByLessonId(selectedLessonId)}
-        isOpen={!!selectedLessonId}
-        onCancel={() => setSelectedLessonId(undefined)}
+        event={selectedEvent}
+        isOpen={!!selectedEvent}
+        onSubmit={(lessonId: number) => {
+          deleteLesson(lessonId);
+          setSelectedEvent(undefined);
+        }}
+        onCancel={() => setSelectedEvent(undefined)}
       />
     </Grid>
   );

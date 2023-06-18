@@ -1,27 +1,23 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { DATE_FORMAT, TIME_FORMAT } from "../constants/data";
+import { groupLessonsByDate } from "../constants/data";
 import type { Lesson } from "../models";
 import config from "../config";
-import { parseISO, format } from "date-fns";
+import api from "../apiSingleton";
 
 // Define a service using a base URL and expected endpoints
 export const lessonsApi = createApi({
   reducerPath: "lessonsApi",
   baseQuery: fetchBaseQuery({ baseUrl: config.baseUrl }),
   endpoints: (builder) => ({
-    getLessons: builder.query<Lesson[], string>({
-      query: () => `lessons/`,
-      transformResponse: (response: any) =>
-        (response.data || []).slice(10, 12).map((lessonData: any) => {
-          const { startDate, endDate, ...lesson } = lessonData;
-          return {
-            ...lesson,
-            date: format(parseISO(startDate), DATE_FORMAT),
-            startTime: format(parseISO(startDate), TIME_FORMAT),
-            endTime: format(parseISO(endDate), TIME_FORMAT),
-          };
-        }),
+    getLessons: builder.query<Record<string, Lesson[]>, string>({
+      query: (searchParams) => `lessons?${searchParams}`,
+      transformResponse: (response: any) => {
+        const lessons: Lesson[] = response.data || [];
+        const groupedLessons = groupLessonsByDate(lessons);
+
+        return groupedLessons;
+      },
       transformErrorResponse: (response: any) => response.error,
     }),
   }),
@@ -30,3 +26,5 @@ export const lessonsApi = createApi({
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
 export const { useGetLessonsQuery } = lessonsApi;
+export const createLesson = api.lessons.create.bind(api.lessons);
+export const deleteLesson = api.lessons.delete.bind(api.lessons);
