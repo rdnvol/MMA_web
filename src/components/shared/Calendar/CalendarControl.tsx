@@ -39,7 +39,7 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
     setSearchParams({
       startDate: format(bounds[0], DATE_FORMAT),
       endDate: format(bounds[1], DATE_FORMAT),
-      coaches,
+      // coaches,
     });
   }, [selectedDate, view, coaches, setSearchParams]);
 

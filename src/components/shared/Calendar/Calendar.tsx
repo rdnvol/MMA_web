@@ -1,38 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  HStack,
-  Box,
-  VStack,
-  Circle,
-  Flex,
-  Grid,
-  GridItem,
-  useMediaQuery,
-} from "@chakra-ui/react";
+import { Grid, GridItem } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
-import { format, isToday } from "date-fns";
 
-import {
-  currentWeek,
-  timeData,
-  PositionedEvent,
-  dailyBounds,
-  slotDuration,
-  getEventsByDateFromLessons,
-  Event,
-} from "../../../constants/data";
-import { getPositionedEvents, getFreeSlots } from "../../../utils/calendar";
+import { PositionedEvent, Event, getDateRange } from "../../../constants/data";
 import { useGetLessonsQuery, deleteLesson } from "../../../services/lessons";
 import { LessonType } from "../../../models";
 
-import LessonCard from "../../base/LessonCard";
-import EmptySlotCard from "../../base/EmptySlotCard";
-import TimeBox from "../../base/TimeBox";
 import CalendarControl from "./CalendarControl";
 import CreateLessonForm from "../CreateLessonForm";
 import DeleteLessonModal from "./DeleteLessonModal";
-
-const cakraHeight = 10;
+import CalendarTable from "./CalendarTable";
 
 type FiltersParams = {
   coaches: number[];
@@ -48,105 +25,17 @@ export const Calendar: React.FC = () => {
     PositionedEvent | undefined
   >();
 
-  const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
-  const cakraWidth = isLargerThan600 ? 40 : 20;
-
   const [filters, setFilters] = useState<FiltersParams>({ coaches: [] });
   const [searchParams] = useSearchParams();
 
   const { data: lessonsData = {}, refetch: refetchLessons } =
-    useGetLessonsQuery("");
+    useGetLessonsQuery(searchParams.toString());
 
   useEffect(() => {
     const coaches = searchParams.getAll("coaches").map((coachId) => +coachId);
 
     setFilters({ coaches });
   }, [searchParams]);
-
-  const renderHeader = (header: string | Date) => (
-    <Flex h={cakraHeight} alignItems="center" gap={2}>
-      {typeof header === "string" ? (
-        header
-      ) : (
-        <>
-          {format(header, "E")}
-          <Circle
-            size="28px"
-            bg={isToday(header) ? "orange.600" : ""}
-            color={isToday(header) ? "white" : ""}
-          >
-            {format(header, "dd")}
-          </Circle>
-        </>
-      )}
-    </Flex>
-  );
-
-  const renderDateColumn = (date: Date) => {
-    const eventsByDate = getEventsByDateFromLessons(date, lessonsData);
-    const positionedEvents = getPositionedEvents(
-      eventsByDate,
-      dailyBounds,
-      slotDuration
-    );
-    const freeSlots = selectedLessonType
-      ? getFreeSlots(
-          eventsByDate,
-          selectedLessonType,
-          selectedDuration,
-          date,
-          dailyBounds
-        )
-      : [];
-
-    return (
-      <VStack key={date.toDateString()} spacing={0}>
-        {renderHeader(date)}
-        <Box
-          position="relative"
-          w={cakraWidth}
-          h={cakraHeight * timeData.length}
-        >
-          {timeData.map((time) => (
-            <TimeBox key={time} />
-          ))}
-          {positionedEvents.map(renderLesson)}
-          {freeSlots.map(renderEmptySlot)}
-        </Box>
-      </VStack>
-    );
-  };
-
-  const renderLesson = (positionedEvent: PositionedEvent) => {
-    return (
-      <LessonCard
-        key={positionedEvent.id}
-        position={positionedEvent.position}
-        coaches={positionedEvent.coaches}
-        label={positionedEvent.label}
-        lessonType={positionedEvent.lessonType}
-        isFloating={positionedEvent.isFloating}
-        coachOrder={positionedEvent.coachOrder}
-        selectedCoaches={filters.coaches}
-        onClick={() => setSelectedEvent(positionedEvent)}
-      />
-    );
-  };
-
-  const renderEmptySlot = (positionedEvent: PositionedEvent) => {
-    return (
-      <EmptySlotCard
-        position={positionedEvent.position}
-        onClick={() => {
-          setSelectedFreeSlot(positionedEvent);
-        }}
-        isSelected={
-          selectedFreeSlot?.date === positionedEvent.date &&
-          selectedFreeSlot?.startTime === positionedEvent.startTime
-        }
-      />
-    );
-  };
 
   const showFreeSlots = (lessonType: LessonType, duration: number): void => {
     setSelectedLessonType(lessonType);
@@ -168,8 +57,9 @@ export const Calendar: React.FC = () => {
   return (
     <Grid
       templateAreas={`"control"
-                      "calendar"`}
-      gridTemplateRows={"60px 1fr"}
+                      "calendar"
+                      "form"`}
+      gridTemplateRows={"60px 1fr 50px"}
       gridTemplateColumns={"1fr"}
       h="100dvh"
       overflowY="hidden"
@@ -180,21 +70,19 @@ export const Calendar: React.FC = () => {
         <CalendarControl />
       </GridItem>
 
-      <GridItem
-        area={"calendar"}
-        overflowX="scroll"
-        h="100%"
-        paddingBottom={50}
-      >
-        <HStack spacing={0} alignItems="flex-start" position="relative">
-          <VStack spacing={0} position="sticky" zIndex={2}>
-            {renderHeader("Time")}
-            {timeData.map((time) => (
-              <TimeBox key={time}>{time}</TimeBox>
-            ))}
-          </VStack>
-          {currentWeek.map(renderDateColumn)}
-        </HStack>
+      <GridItem area={"calendar"} overflowX="scroll" h="100%">
+        <CalendarTable
+          dateRange={getDateRange(
+            searchParams.get("startDate") || "",
+            searchParams.get("endDate") || ""
+          )}
+          lessonsData={lessonsData}
+          selectedLessonType={selectedLessonType}
+          selectedDuration={selectedDuration}
+          selectedFreeSlot={selectedFreeSlot}
+          onSelectFreeSlot={setSelectedFreeSlot}
+          onSelectLesson={setSelectedEvent}
+        />
       </GridItem>
 
       <CreateLessonForm
