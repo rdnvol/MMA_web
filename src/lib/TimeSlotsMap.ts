@@ -30,15 +30,17 @@ export default class TimeSlotsMap {
     return timeSlotsMap;
   }
 
-  _getMatchingTimeSlots(startTime: number): number[] {
-    let offset = 0;
-    const timeSlots: number[] = [];
+  _getMatchingTimeSlots(bounds: [number, number]): TimeSlot[] {
+    const timeSlots: TimeSlot[] = [];
 
-    while (offset < this.duration / slotDuration) {
-      if (startTime - offset * slotDuration >= this.dailyBounds[0]) {
-        timeSlots.push(startTime - offset * slotDuration);
-      }
-      offset += 1;
+    const [startTime, endTime] = bounds;
+
+    // start from last one time slot
+    let timeSlot = this.getTimeSlot(endTime - slotDuration);
+
+    while (!!timeSlot && timeSlot.startTime + timeSlot.duration > startTime) {
+      timeSlots.push(timeSlot);
+      timeSlot = this.getTimeSlot(timeSlot.startTime - slotDuration);
     }
 
     return timeSlots;
@@ -69,15 +71,15 @@ export default class TimeSlotsMap {
       let isAvailable = true;
 
       if (isFloating) {
-        isAvailable = timeSlot.getFloatingAvailability(coaches);
+        isAvailable = timeSlot.isAvailableForFloating(coaches);
       }
 
       if (!isFloating && isHalfTime) {
-        isAvailable = timeSlot.getHalfTimeAvailability(coaches);
+        isAvailable = timeSlot.isAvailableForHalftime(coaches);
       }
 
       if (!isFloating && !isHalfTime) {
-        isAvailable = timeSlot.getFullTimeAvailability(coaches);
+        isAvailable = timeSlot.isAvailableForFulltime(coaches);
       }
 
       if (isAvailable) {
@@ -94,37 +96,13 @@ export default class TimeSlotsMap {
         continue;
       }
 
-      let time = event.startTime;
-      const isFloating = event.isFloating;
-      const isHalfTime = event.isHalfTime;
+      const timeSlots = this._getMatchingTimeSlots([
+        event.startTime,
+        event.endTime,
+      ]);
 
-      while (time < event.endTime) {
-        const timeSlotsKeys = this._getMatchingTimeSlots(time);
-
-        if (event.orderedCoaches && event.orderedCoaches.length > 0) {
-          const index = (time - event.startTime) / slotDuration;
-          const coach = event.orderedCoaches[index];
-
-          timeSlotsKeys.forEach((key) => {
-            this.getTimeSlot(key)?.addCoachBusiness(
-              coach,
-              !!isFloating,
-              !!isHalfTime
-            );
-          });
-        } else {
-          for (const coach of event.coaches) {
-            timeSlotsKeys.forEach((key) => {
-              this.getTimeSlot(key)?.addCoachBusiness(
-                coach,
-                !!isFloating,
-                !!isHalfTime
-              );
-            });
-          }
-        }
-
-        time += slotDuration;
+      for (const timeSlot of timeSlots) {
+        timeSlot.addEvent(event);
       }
     }
   }

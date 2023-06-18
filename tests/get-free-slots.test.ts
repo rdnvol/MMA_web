@@ -400,10 +400,42 @@ test("Get free slots for 3rd full-time lesson (1st half-time, 2nd floating)", ()
 
   const lessons: Lesson[] = [
     buildLesson("8:30", "9:30", halftimeLessonType),
-    buildLesson("9:30", "10:30", floatingLessonType),
+    buildLesson("9:30", "10:30", floatingLessonType, [
+      coachesData[1],
+      coachesData[0],
+    ]),
   ];
 
   const expectedSlots = generateSlotsBetween(["10:30", dailyBounds[1]]);
 
   assertFreeSlots(lessons, lessonType, expectedSlots);
+});
+
+test("Get free slots for 3rd full-time floating lesson (1st half-time, 2nd fulltime)", () => {
+  const fulltimeLessonType: LessonType = {
+    id: "test-lesson-type",
+    type: LESSON_TYPES.PERSONAL,
+    coaches: [coachesData[0]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  };
+  const halftimeLessonType = {
+    ...fulltimeLessonType,
+    coachBusyLevel: BUSY_LEVELS.HALF,
+  };
+  const floatingLessonType = {
+    ...fulltimeLessonType,
+    coaches: [coachesData[0], coachesData[1]],
+  };
+
+  const lessons: Lesson[] = [
+    buildLesson("8:30", "9:30", halftimeLessonType),
+    buildLesson("9:30", "10:30", fulltimeLessonType),
+  ];
+
+  const expectedSlots = generateSlotsBetween(
+    [dailyBounds[0], "9:00"],
+    ["10:00", dailyBounds[1]]
+  );
+
+  assertFreeSlots(lessons, floatingLessonType, expectedSlots);
 });
