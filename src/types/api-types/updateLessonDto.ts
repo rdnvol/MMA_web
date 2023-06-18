@@ -19,6 +19,6 @@ export class UpdateLessonDto {
     lessonTypeId?: number;
     name?: string;
     startDate?: string;
-    coachOrder?: Array<string>;
+    coachOrder?: Array<number>;
 }
 

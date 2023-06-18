@@ -1,4 +1,4 @@
-import { COACHES, Event } from "../constants/data";
+import { Event } from "../constants/data";
 import { Coach } from "../models";
 import arrayToMap from "../utils/arrayToMap";
 import { Meeting } from "../utils/calendar";
@@ -209,9 +209,9 @@ function splitOrderedEvent(event: Event): Event[] {
 
   const coachesMap = arrayToMap<Coach>(event.coaches);
 
-  return coachOrder.map((coach, index) => ({
+  return coachOrder.map((coachId, index) => ({
     ...event,
-    coaches: [coachesMap[coach.id]],
+    coaches: [coachesMap[coachId]],
     startTime: startTime + index * orderDuration,
     endTime: startTime + (index + 1) * orderDuration,
   }));

@@ -37,7 +37,7 @@ export type Event = {
   label: string;
   isFloating?: boolean;
   isHalfTime?: boolean;
-  coachOrder?: Coach[];
+  coachOrder?: number[];
 };
 
 export type EventsLine = Event[];
@@ -73,6 +73,14 @@ export function getDateRange(start?: string, end?: string): Date[] {
   return dateRange;
 }
 
+export function isLessonFloating(lesson: Lesson): boolean {
+  return (
+    lesson.lessonType.type !== LESSON_TYPES.Other &&
+    lesson.lessonType.coaches.length > 1 &&
+    !lesson.coachOrder?.length
+  );
+}
+
 export function dumpLessonToEvent(lesson: Lesson): Event {
   const startDate = new Date(lesson.startDate);
   const endDate = new Date(lesson.endDate);
@@ -90,10 +98,7 @@ export function dumpLessonToEvent(lesson: Lesson): Event {
     coaches: lesson.lessonType.coaches,
     label: lesson.name || lesson.participants?.map((p) => p.name).join(" + "),
     lessonType: lesson.lessonType,
-    isFloating:
-      lesson.lessonType.type !== LESSON_TYPES.Other &&
-      lesson.lessonType.coaches.length > 1 &&
-      !lesson.coachOrder?.length,
+    isFloating: isLessonFloating(lesson),
     isHalfTime: lesson.lessonType.coachBusyLevel === BUSY_LEVELS.Half,
     // TODO: delete!!!
     coachOrder:

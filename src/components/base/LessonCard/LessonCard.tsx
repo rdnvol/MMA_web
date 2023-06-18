@@ -1,22 +1,16 @@
-import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
+import { Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { COACHES, Position } from "../../../constants/data";
+import { Position } from "../../../constants/data";
 import { cellHeight, cellWidth } from "../../../constants/table";
-import { Coach, LessonType, LESSON_TYPES } from "../../../models";
-import arrayToMap from "../../../utils/arrayToMap";
-
-const colorsMap: Record<COACHES, string> = {
-  [COACHES.Vika]: "green.300",
-  [COACHES.Sasha]: "red.300",
-  [COACHES.Empty]: "gray.300",
-};
+import { Coach, LessonType } from "../../../models";
+import { CoachesCard } from "../CoachesCard/CoachesCard";
 
 export type LessonCardProps = {
   label?: string;
   coaches: Coach[];
-  coachOrder?: Coach[];
+  coachOrder?: number[];
   position: Position;
   lessonType?: LessonType;
   isFloating?: boolean;
@@ -36,37 +30,6 @@ export const LessonCard: React.FC<LessonCardProps> = (
   const top = props.position.y * cellHeight;
   const left = props.position.x * maxWidth;
 
-  const getColors = () => {
-    const coachesMap = arrayToMap<Coach>(props.coaches);
-
-    const coaches: Coach[] = !!props.coachOrder?.length
-      ? props.coachOrder.map((c) => coachesMap[c.id])
-      : props.coaches;
-
-    let colors = [colorsMap[COACHES.Empty]];
-
-    if (coaches.length && props.lessonType?.type !== LESSON_TYPES.Other) {
-      colors = coaches.map((coach) => {
-        const isSelected =
-          !props.selectedCoaches?.length ||
-          props.selectedCoaches.find((c) => c === coach.id);
-
-        return isSelected
-          ? colorsMap[coach.name as COACHES]
-          : colorsMap[COACHES.Empty];
-      });
-    }
-
-    if (props.isFloating) {
-      colors.push(...colors);
-      colors.push(...colors);
-    }
-
-    return colors;
-  };
-
-  const colors = getColors();
-
   const label =
     width >= maxWidth / 2
       ? props.label
@@ -76,27 +39,19 @@ export const LessonCard: React.FC<LessonCardProps> = (
           .join(" ");
 
   return (
-    <Card
+    <CoachesCard
       position="absolute"
       top={`${top}px`}
       left={`${left}px`}
       w={`${width}px`}
       h={`${height}px`}
-      direction="row"
-      overflow="hidden"
-      variant={"outline"}
       onClick={props.onClick}
+      coaches={props.coaches}
+      coachOrder={props.coachOrder}
+      selectedCoaches={props.selectedCoaches}
+      lessonType={props.lessonType}
+      isFloating={props.isFloating}
     >
-      <VStack h="100%" w="5px" minW="5px" spacing={0}>
-        {colors.map((bgColor, index) => (
-          <Box
-            key={index}
-            w="100%"
-            h={`${100 / colors.length}%`}
-            bgColor={bgColor}
-          />
-        ))}
-      </VStack>
       <Flex direction="column" paddingX={1} overflow="hidden">
         <Text fontSize="xs" as="span" fontWeight="bold" noOfLines={3}>
           {label}
@@ -105,7 +60,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
           {props.lessonType ? t(`lessonType:${props.lessonType.type}`) : ""}
         </Text>
       </Flex>
-    </Card>
+    </CoachesCard>
   );
 };
 

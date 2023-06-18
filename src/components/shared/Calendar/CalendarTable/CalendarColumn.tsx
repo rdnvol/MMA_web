@@ -1,4 +1,5 @@
 import { Box, useMediaQuery, VStack } from "@chakra-ui/react";
+import { isEqual } from "date-fns";
 import React from "react";
 import {
   dailyBounds,
@@ -84,7 +85,8 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
         position={positionedEvent.position}
         onClick={() => onSelectFreeSlot(positionedEvent)}
         isSelected={
-          selectedFreeSlot?.date === positionedEvent.date &&
+          selectedFreeSlot &&
+          isEqual(selectedFreeSlot?.date, positionedEvent.date) &&
           selectedFreeSlot?.startTime === positionedEvent.startTime
         }
       />
