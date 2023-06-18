@@ -9,19 +9,19 @@ export type Calendar = Meeting[];
 export type Meeting = [number, number];
 
 export function getCurrentWeek(today: Date) {
-  const week = getWeek(today);
+  const week = getWeek(today, { weekStartsOn: 1 });
 
   let currentWeek = [today];
 
   let minDayOfWeek = subDays(today, 1);
   let maxDayOfWeek = addDays(today, 1);
 
-  while (week === getWeek(minDayOfWeek)) {
+  while (week === getWeek(minDayOfWeek, { weekStartsOn: 1 })) {
     currentWeek.unshift(minDayOfWeek);
     minDayOfWeek = subDays(minDayOfWeek, 1);
   }
 
-  while (week === getWeek(maxDayOfWeek)) {
+  while (week === getWeek(maxDayOfWeek, { weekStartsOn: 1 })) {
     currentWeek.push(maxDayOfWeek);
     maxDayOfWeek = addDays(maxDayOfWeek, 1);
   }
