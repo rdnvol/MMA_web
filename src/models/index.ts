@@ -32,11 +32,13 @@ export interface Participant {
 
 export interface Lesson {
   id: string;
+  label?: string;
   lessonType: LessonType;
   participants: Participant[];
   date: string;
   startTime: string;
   endTime: string;
+  orderedCoaches?: Coach[];
 }
 
 export interface CalendarDay {

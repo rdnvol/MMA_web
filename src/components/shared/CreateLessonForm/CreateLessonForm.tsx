@@ -5,6 +5,7 @@ import {
   Button,
   VStack,
   Heading,
+  Input,
 } from "@chakra-ui/react";
 import { COACHES, coachesData, Event } from "../../../constants/data";
 import { LESSON_TYPES } from "../../../models";
@@ -14,9 +15,9 @@ import { format } from "date-fns";
 import { minutesToTime } from "../../../utils/calendar";
 
 const lessonOptions: LESSON_TYPES[] = [
+  LESSON_TYPES.PERSONAL,
   LESSON_TYPES.SPLIT,
   LESSON_TYPES.GROUP,
-  LESSON_TYPES.PERSONAL,
   LESSON_TYPES.MASSAGE,
 ];
 const coachesOptions = coachesData.map((coach) => coach.name);
@@ -30,7 +31,7 @@ export type CreateLessonFormProps = {
     coaches: COACHES[],
     duration: number
   ) => void;
-  onSubmit: () => void;
+  onSubmit: (label: string) => void;
   onCancel: () => void;
   selectedFreeSlot?: Event;
 };
@@ -49,6 +50,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     durationOptions[1]
   );
   const [areFreeSlotsRequested, setAreFreeSlotsRequested] = useState(false);
+  const [label, setLabel] = useState<string>("");
 
   const changeSelectedCoaches = (value: string[]) => {
     setSelectedCoaches(value as COACHES[]);
@@ -68,13 +70,14 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const submitForm = (e: any) => {
     e.preventDefault();
     resetForm(e);
-    onSubmit();
+    onSubmit(label);
   };
 
   const resetForm = (e: any) => {
     e.preventDefault();
     setSelectedLessonType(lessonOptions[0]);
     changeSelectedCoaches([]);
+    setLabel("");
     setSelectedDuration(durationOptions[1]);
     setAreFreeSlotsRequested(false);
     onCancel();
@@ -135,6 +138,18 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
           </FormLabel>
         </FormControl>
+
+        {selectedFreeSlot && (
+          <FormControl>
+            <FormLabel>Participants</FormLabel>
+            <Input
+              value={label}
+              onChange={(evt) => setLabel(evt.target.value)}
+              autoFocus
+              colorScheme={colorScheme}
+            />
+          </FormControl>
+        )}
 
         <Button
           colorScheme={colorScheme}

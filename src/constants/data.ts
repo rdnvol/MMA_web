@@ -13,7 +13,7 @@ import {
   getCurrentWeek,
 } from "../utils/calendar";
 
-const DATE_FORMAT = "yyyy-MM-dd";
+export const DATE_FORMAT = "yyyy-MM-dd";
 export const today = new Date();
 export const currentWeek = getCurrentWeek(today);
 export const slotDuration = 30;
@@ -40,6 +40,8 @@ export type Event = {
   coaches: COACHES[];
   lessonType?: LESSON_TYPES;
   label?: string;
+  isFloating?: boolean;
+  orderedCoaches?: COACHES[];
 };
 
 export type EventsLine = Event[];
@@ -133,6 +135,20 @@ export const lessonTypesData: LessonType[] = [
     coaches: [coachesData[0], coachesData[1]],
     coachBusyLevel: BUSY_LEVELS.FULL,
   },
+
+  // Massage
+  {
+    id: "massage-sasha",
+    type: LESSON_TYPES.MASSAGE,
+    coaches: [coachesData[0]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  },
+  {
+    id: "massage-vika",
+    type: LESSON_TYPES.MASSAGE,
+    coaches: [coachesData[1]],
+    coachBusyLevel: BUSY_LEVELS.FULL,
+  },
 ];
 
 const participantsData: Participant[] = [
@@ -183,29 +199,54 @@ const lessonsData: Lesson[] = [
     endTime: "18:00",
   },
 
+  // {
+  //   id: "mon-1",
+  //   lessonType: lessonTypesData[3],
+  //   participants: [participantsData[3]],
+  //   date: format(currentWeek[1], DATE_FORMAT),
+  //   startTime: "8:30",
+  //   endTime: "9:00",
+  // },
+  // {
+  //   id: "mon-2",
+  //   lessonType: lessonTypesData[0],
+  //   participants: [participantsData[2]],
+  //   date: format(currentWeek[1], DATE_FORMAT),
+  //   startTime: "10:00",
+  //   endTime: "11:00",
+  // },
+  // {
+  //   id: "mon-3",
+  //   lessonType: lessonTypesData[6],
+  //   participants: [participantsData[0], participantsData[1]],
+  //   date: format(currentWeek[1], DATE_FORMAT),
+  //   startTime: "11:30",
+  //   endTime: "12:30",
+  // },
+  // {
+  //   id: "mon-4",
+  //   lessonType: lessonTypesData[6],
+  //   participants: [participantsData[2], participantsData[3]],
+  //   date: format(currentWeek[1], DATE_FORMAT),
+  //   startTime: "12:00",
+  //   endTime: "13:30",
+  // },
+  // {
+  //   id: "mon-5",
+  //   lessonType: lessonTypesData[6],
+  //   participants: [participantsData[4]],
+  //   date: format(currentWeek[1], DATE_FORMAT),
+  //   startTime: "9:00",
+  //   endTime: "10:00",
+  //   // orderedCoaches: [coachesData[0], coachesData[1]],
+  // },
   {
-    id: "mon-1",
-    lessonType: lessonTypesData[3],
-    participants: [participantsData[3]],
-    date: format(currentWeek[1], DATE_FORMAT),
-    startTime: "8:30",
-    endTime: "9:00",
-  },
-  {
-    id: "mon-2",
-    lessonType: lessonTypesData[0],
-    participants: [participantsData[2]],
-    date: format(currentWeek[1], DATE_FORMAT),
-    startTime: "10:00",
-    endTime: "11:00",
-  },
-  {
-    id: "mon-3",
+    id: "mon-6",
     lessonType: lessonTypesData[6],
-    participants: [participantsData[0], participantsData[1]],
+    participants: [participantsData[4]],
     date: format(currentWeek[1], DATE_FORMAT),
-    startTime: "11:30",
-    endTime: "13:00",
+    startTime: "9:00",
+    endTime: "10:00",
   },
   {
     id: "tue-1",
@@ -237,7 +278,7 @@ const lessonsData: Lesson[] = [
     participants: [participantsData[2]],
     date: format(currentWeek[2], DATE_FORMAT),
     startTime: "11:30",
-    endTime: "13:00",
+    endTime: "12:30",
   },
   {
     id: "wed-1",
@@ -348,23 +389,60 @@ const lessonsData: Lesson[] = [
     lessonType: lessonTypesData[8],
     participants: [participantsData[3], participantsData[2]],
     date: format(currentWeek[4], DATE_FORMAT),
-    startTime: "11:00",
-    endTime: "12:00",
+    startTime: "11:30",
+    endTime: "12:30",
+    orderedCoaches: [
+      lessonTypesData[8].coaches[1],
+      lessonTypesData[8].coaches[0],
+    ],
   },
 ];
 
 export const calendarData: Record<string, Lesson[]> =
   groupLessonsByDate(lessonsData);
 
-function dumpLessonToEvent(lesson: Lesson): Event {
+function refreshCalendarData() {
+  const calendar = groupLessonsByDate(lessonsData);
+
+  for (const date of Object.keys(calendar)) {
+    calendarData[date] = calendar[date];
+  }
+}
+
+function getLessonsByDateTime(date: string, timeBounds: [number, number]) {
+  const lessons = calendarData[date];
+
+  return lessons
+    .filter((lesson) => {
+      const startTime = timeToMinutes(lesson.startTime);
+      const endTime = timeToMinutes(lesson.endTime);
+
+      if (
+        (timeBounds[0] >= startTime && timeBounds[0] < endTime) ||
+        (timeBounds[1] > startTime && timeBounds[1] <= endTime)
+      ) {
+        return true;
+      }
+
+      return false;
+    })
+    .map((lesson) => lesson.id);
+}
+
+export function dumpLessonToEvent(lesson: Lesson): Event {
   return {
     id: lesson.id,
     date: parse(lesson.date, DATE_FORMAT, new Date()),
     startTime: timeToMinutes(lesson.startTime),
     endTime: timeToMinutes(lesson.endTime),
     coaches: lesson.lessonType.coaches.map((coach) => coach.name as COACHES),
-    label: lesson.participants.map((p) => p.name).join(" + "),
+    label: lesson.label || lesson.participants.map((p) => p.name).join(" + "),
     lessonType: lesson.lessonType.type,
+    isFloating:
+      lesson.lessonType.coaches.length > 1 && !lesson.orderedCoaches?.length,
+    orderedCoaches: lesson.orderedCoaches?.map(
+      (coach) => coach.name as COACHES
+    ),
   };
 }
 
@@ -375,11 +453,79 @@ export function getEventsByDate(date: Date): Event[] {
 }
 
 export function addLesson(lesson: Lesson) {
-  if (!calendarData[lesson.date]) {
-    calendarData[lesson.date] = [];
+  lessonsData.push(lesson);
+
+  refreshCalendarData();
+}
+
+export function updateCoachesOrder(
+  date: Date,
+  coach: Coach,
+  timeBounds: [number, number],
+  lessonType: LESSON_TYPES,
+  seen: Record<string, true> = {}
+  // TODO: add transaction
+) {
+  const formattedDate = format(date, DATE_FORMAT);
+
+  const lessonsIds = getLessonsByDateTime(formattedDate, timeBounds);
+
+  for (const lessonId of lessonsIds) {
+    if (lessonId in seen) {
+      continue;
+    }
+
+    const lessonIndex = lessonsData.findIndex(
+      (lesson) => lessonId === lesson.id
+    );
+
+    if (lessonIndex === -1) {
+      continue;
+    }
+
+    seen[lessonId] = true;
+
+    const lesson = lessonsData[lessonIndex];
+    const coaches = lesson.lessonType.coaches;
+
+    if (coaches.length === 1) {
+      continue;
+    }
+
+    const anotherCoach = coaches.find((c) => c.id !== coach.id);
+
+    if (!anotherCoach) {
+      continue;
+    }
+
+    let time = timeToMinutes(lesson.startTime);
+    lesson.orderedCoaches = [];
+
+    while (time < timeToMinutes(lesson.endTime)) {
+      if (time >= timeBounds[0] && time < timeBounds[1]) {
+        updateCoachesOrder(
+          date,
+          anotherCoach,
+          [time, time + slotDuration],
+          lesson.lessonType.type,
+          seen
+        );
+        lesson.orderedCoaches.push(anotherCoach);
+      } else {
+        updateCoachesOrder(
+          date,
+          coach,
+          [time, time + slotDuration],
+          lesson.lessonType.type,
+          seen
+        );
+        lesson.orderedCoaches.push(coach);
+      }
+      time += slotDuration;
+    }
   }
 
-  calendarData[lesson.date].push(lesson);
+  refreshCalendarData();
 }
 
 function groupLessonsByDate(lessons: Lesson[]): Record<string, Lesson[]> {

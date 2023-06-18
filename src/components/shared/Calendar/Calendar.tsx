@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { nanoid } from "nanoid";
 import {
   HStack,
   Box,
@@ -20,6 +21,7 @@ import {
   COACHES,
   lessonTypesData,
   addLesson,
+  updateCoachesOrder,
 } from "../../../constants/data";
 import {
   getPositionedEvents,
@@ -77,6 +79,40 @@ export const Calendar: React.FC = () => {
     </Box>
   );
 
+  const renderDateColumn = (date: Date) => {
+    const eventsByDate = getEventsByDate(date);
+    const filteredEvents = filterEventsByCoaches(eventsByDate, selectedCoaches);
+    const positionedEvents = getPositionedEvents(
+      filteredEvents,
+      dailyBounds,
+      slotDuration
+    );
+    const freeSlots =
+      selectedLessonType && date.getDate() === 20
+        ? getFreeSlots(
+            eventsByDate,
+            selectedLessonType,
+            selectedDuration,
+            date,
+            dailyBounds
+          )
+        : [];
+
+    return (
+      <VStack key={date.toDateString()} spacing={0}>
+        {renderHeader(date)}
+        <Box
+          position="relative"
+          w={cakraWidth}
+          h={cakraHeight * timeData.length}
+        >
+          {positionedEvents.map(renderLesson)}
+          {freeSlots.map(renderEmptySlot)}
+        </Box>
+      </VStack>
+    );
+  };
+
   const renderLesson = (positionedEvent: PositionedEvent) => {
     return (
       <LessonCard
@@ -84,6 +120,9 @@ export const Calendar: React.FC = () => {
         coaches={positionedEvent.coaches}
         label={positionedEvent.label}
         lessonType={positionedEvent.lessonType}
+        isFloating={positionedEvent.isFloating}
+        orderedCoaches={positionedEvent.orderedCoaches}
+        selectedCoaches={selectedCoaches}
       />
     );
   };
@@ -121,18 +160,33 @@ export const Calendar: React.FC = () => {
     }
   };
 
-  const submitCreateLesson = () => {
+  const submitCreateLesson = (label: string) => {
     if (!selectedFreeSlot || !selectedLessonType) {
       return;
     }
 
+    if (selectedLessonType.coaches.length === 1) {
+      const timeBounds: [number, number] = [
+        selectedFreeSlot.startTime,
+        selectedFreeSlot.endTime,
+      ];
+
+      updateCoachesOrder(
+        selectedFreeSlot.date,
+        selectedLessonType.coaches[0],
+        timeBounds,
+        selectedLessonType.type
+      );
+    }
+
     addLesson({
-      id: "some-id",
+      id: nanoid(8),
       lessonType: selectedLessonType,
       participants: [],
       date: format(selectedFreeSlot.date, "yyyy-MM-dd"),
       startTime: minutesToTime(selectedFreeSlot.startTime),
       endTime: minutesToTime(selectedFreeSlot.endTime),
+      label,
     });
 
     cancelCreateLesson();
@@ -166,40 +220,15 @@ export const Calendar: React.FC = () => {
       </GridItem>
       <GridItem pl="2" area={"calendar"} overflow="scroll" h="100%">
         <HStack
-          spacing="0px"
+          spacing={0}
           divider={<StackDivider borderColor="gray.200" />}
           alignItems="flex-start"
         >
-          <VStack spacing={0} position="relative">
+          <VStack spacing={0} divider={<StackDivider borderColor="gray.200" />}>
             {renderHeader("Time")}
             {timeData.map(renderTime)}
           </VStack>
-          {currentWeek.map((date) => (
-            <VStack key={date.toDateString()} spacing={0}>
-              {renderHeader(date)}
-              <Box
-                position="relative"
-                w={cakraWidth}
-                h={cakraHeight * timeData.length}
-              >
-                {getPositionedEvents(
-                  filterEventsByCoaches(getEventsByDate(date), selectedCoaches),
-                  dailyBounds,
-                  slotDuration
-                ).map((event) => renderLesson(event))}
-                {selectedLessonType &&
-                  getFreeSlots(
-                    getEventsByDate(date),
-                    dailyBounds,
-                    selectedDuration,
-                    date,
-                    (selectedLessonType.coaches || []).map(
-                      (coach) => coach.name as COACHES
-                    )
-                  ).map((event) => renderEmptySlot(event))}
-              </Box>
-            </VStack>
-          ))}
+          {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
       <GridItem pl="2" area={"form"}>
