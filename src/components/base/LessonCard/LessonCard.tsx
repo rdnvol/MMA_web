@@ -2,10 +2,9 @@ import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
 
 import { COACHES, Position } from "../../../constants/data";
+import { cellHeight, cellWidth } from "../../../constants/table";
 import { Coach, LessonType, LESSON_TYPES } from "../../../models";
 import arrayToMap from "../../../utils/arrayToMap";
-
-const minHeight = 40;
 
 const colorsMap: Record<COACHES, string> = {
   [COACHES.Vika]: "green.300",
@@ -28,11 +27,11 @@ export const LessonCard: React.FC<LessonCardProps> = (
   props: LessonCardProps
 ) => {
   const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
-  const maxWidth = isLargerThan600 ? 160 : 80;
+  const maxWidth = isLargerThan600 ? cellWidth.md : cellWidth.sm;
 
-  const height = props.position.h * 40;
+  const height = props.position.h * cellHeight;
   const width = props.position.w * maxWidth;
-  const top = props.position.y * minHeight;
+  const top = props.position.y * cellHeight;
   const left = props.position.x * maxWidth;
 
   const getColors = () => {

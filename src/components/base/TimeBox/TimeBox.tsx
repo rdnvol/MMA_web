@@ -1,12 +1,11 @@
 import React from "react";
 import { Box } from "@chakra-ui/react";
-
-const cakraHeight = 10;
+import { cellHeight } from "../../../constants/table";
 
 export const TimeBox: React.FC<React.PropsWithChildren> = ({ children }) => (
   <Box
     w="full"
-    h={cakraHeight}
+    h={`${cellHeight}px`}
     borderColor="gray.200"
     borderBottomWidth={1}
     borderRightWidth={1}
