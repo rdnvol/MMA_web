@@ -14,6 +14,7 @@ import {
   Icon,
   Box,
   useMediaQuery,
+  Text,
 } from "@chakra-ui/react";
 import { FaChevronUp, FaChevronDown, FaPlus, FaTimes } from "react-icons/fa";
 import { COACHES, coachesData, Event } from "../../../constants/data";
@@ -174,16 +175,20 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             flexDirection="row"
             alignItems="center"
             justifyContent="flex-start"
-            gap="4"
+            gap="3"
           >
             <Tag size="sm" variant="outline" colorScheme={colorScheme}>
               <TagLabel>{selectedLessonType}</TagLabel>
             </Tag>
-            <Heading size="sm">{selectedCoaches.join(", ")}</Heading>
-            {selectedFreeSlot &&
-              `${format(selectedFreeSlot.date, "E dd")}, ${minutesToTime(
-                selectedFreeSlot.startTime
-              )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
+            <Heading size="sm" noOfLines={1}>
+              {selectedCoaches.join(", ")}
+            </Heading>
+            <Text noOfLines={1}>
+              {selectedFreeSlot &&
+                `${format(selectedFreeSlot.date, "E dd")}, ${minutesToTime(
+                  selectedFreeSlot.startTime
+                )} - ${minutesToTime(selectedFreeSlot.endTime)}`}
+            </Text>
           </Flex>
           <IconButton
             variant="ghost"
@@ -287,6 +292,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
       bg="chakra-body-bg"
       flexDirection="column"
       overflow="hidden"
+      zIndex={5}
     >
       {renderHeader()}
       {view === VIEWS.SELECT_COACH && renderSelectLessonTypeForm()}

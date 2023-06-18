@@ -3,7 +3,6 @@ import { nanoid } from "nanoid";
 import {
   HStack,
   Box,
-  StackDivider,
   VStack,
   Circle,
   Flex,
@@ -11,6 +10,7 @@ import {
   GridItem,
   useMediaQuery,
 } from "@chakra-ui/react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   currentWeek,
@@ -40,7 +40,6 @@ import { format, isToday } from "date-fns";
 import EmptySlotCard from "../../base/EmptySlotCard";
 import CalendarControl from "./CalendarControl";
 import { useGetLessonsQuery } from "../../../services/lessons";
-import { useSearchParams } from "react-router-dom";
 
 const cakraHeight = 10;
 
@@ -93,7 +92,16 @@ export const Calendar: React.FC = () => {
   );
 
   const renderTime = (time: string = "") => (
-    <Box key={time} w="50px" h={cakraHeight}>
+    <Box
+      key={time}
+      w="full"
+      h={cakraHeight}
+      borderColor="gray.200"
+      borderTopWidth={1}
+      borderRightWidth={1}
+      textAlign="right"
+      p="1"
+    >
       {time}
     </Box>
   );
@@ -125,6 +133,7 @@ export const Calendar: React.FC = () => {
           w={cakraWidth}
           h={cakraHeight * timeData.length}
         >
+          {timeData.map(() => renderTime())}
           {positionedEvents.map(renderLesson)}
           {freeSlots.map(renderEmptySlot)}
         </Box>
@@ -220,10 +229,10 @@ export const Calendar: React.FC = () => {
 
   return (
     <Grid
-      templateAreas={`"control control"
-                      "time calendar"`}
+      templateAreas={`"control"
+                      "calendar"`}
       gridTemplateRows={"60px 1fr"}
-      gridTemplateColumns={"50px 1fr"}
+      gridTemplateColumns={"1fr"}
       h="100vh"
       overflowY="hidden"
       gap="1"
@@ -233,20 +242,17 @@ export const Calendar: React.FC = () => {
         <CalendarControl />
       </GridItem>
 
-      <GridItem area="time" boxShadow="md">
-        <VStack spacing={0} divider={<StackDivider borderColor="gray.200" />}>
-          {renderHeader("Time")}
-          {timeData.map(renderTime)}
-        </VStack>
-      </GridItem>
-
-      <GridItem area={"calendar"} overflowX="scroll" h="100%">
-        <HStack
-          spacing={0}
-          divider={<StackDivider borderColor="gray.200" />}
-          alignItems="flex-start"
-          h="100%"
-        >
+      <GridItem
+        area={"calendar"}
+        overflowX="scroll"
+        h="100%"
+        paddingBottom={50}
+      >
+        <HStack spacing={0} alignItems="flex-start" position="relative">
+          <VStack spacing={0} position="sticky" zIndex={2}>
+            {renderHeader("Time")}
+            {timeData.map(renderTime)}
+          </VStack>
           {currentWeek.map(renderDateColumn)}
         </HStack>
       </GridItem>
