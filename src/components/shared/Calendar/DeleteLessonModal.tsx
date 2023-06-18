@@ -13,11 +13,13 @@ import {
   Tag,
   TagLabel,
   Flex,
+  VStack,
 } from "@chakra-ui/react";
 
 import { format } from "date-fns";
 import { Event } from "../../../constants/data";
 import { minutesToTime } from "../../../utils/calendar";
+import { useTranslation } from "react-i18next";
 
 type DeleteLessonModalProps = {
   event?: Event;
@@ -34,6 +36,7 @@ export const DeleteLessonModal: React.FC<DeleteLessonModalProps> = ({
   onCancel = () => {},
   onSubmit = () => {},
 }) => {
+  const { t } = useTranslation("common");
   const submit = () => {
     if (!event) {
       return;
@@ -46,30 +49,36 @@ export const DeleteLessonModal: React.FC<DeleteLessonModalProps> = ({
     <Modal isOpen={isOpen} onClose={onCancel}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Delete lesson?</ModalHeader>
+        <ModalHeader>{t("Delete lesson?")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text>
-            {event &&
-              `${format(event.date, "E dd")}, ${minutesToTime(
-                event.startTime
-              )} - ${minutesToTime(event.endTime)}`}
-          </Text>
-          <Flex flexDirection="row" gap="3">
-            <Text>{event?.coaches.map((coach) => coach.name).join(", ")}</Text>
-            <Tag size="sm" variant="outline" colorScheme={colorScheme}>
-              <TagLabel>{event?.lessonType.type}</TagLabel>
-            </Tag>
-          </Flex>
-          <Heading size="sm">{event?.label}</Heading>
+          <VStack gap="1" alignItems="start">
+            <Text>
+              {event &&
+                `${format(event.date, "E dd")}, ${minutesToTime(
+                  event.startTime
+                )} - ${minutesToTime(event.endTime)}`}
+            </Text>
+            <Flex flexDirection="row" gap="3">
+              <Text>
+                {event?.coaches
+                  .map((coach) => t(`coach:${coach.name}`))
+                  .join(", ")}
+              </Text>
+              <Tag size="sm" variant="outline" colorScheme={colorScheme}>
+                <TagLabel>{t(`lessonType:${event?.lessonType.type}`)}</TagLabel>
+              </Tag>
+            </Flex>
+            <Heading size="sm">{event?.label}</Heading>
+          </VStack>
         </ModalBody>
 
         <ModalFooter>
           <Button variant="ghost" onClick={onCancel}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button colorScheme="red" mr={3} onClick={submit}>
-            Delete
+            {t("Delete")}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -10,6 +10,7 @@ import CalendarControl from "./CalendarControl";
 import CreateLessonForm from "../CreateLessonForm";
 import DeleteLessonModal from "./DeleteLessonModal";
 import CalendarTable from "./CalendarTable";
+import config from "../../../config";
 
 type FiltersParams = {
   coaches: number[];
@@ -29,7 +30,9 @@ export const Calendar: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const { data: lessonsData = {}, refetch: refetchLessons } =
-    useGetLessonsQuery(searchParams.toString());
+    useGetLessonsQuery(searchParams.toString(), {
+      pollingInterval: config.pollingInterval,
+    });
 
   useEffect(() => {
     const coaches = searchParams.getAll("coaches").map((coachId) => +coachId);

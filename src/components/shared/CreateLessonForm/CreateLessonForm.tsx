@@ -100,14 +100,14 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
   const coachesOptions = coachesData.map((coach) => ({
     value: coach.id,
-    label: coach.name,
+    label: t(`coach:${coach.name}`),
   }));
 
   const lessonTypesOptions = lessonOptions.map((option) => {
     return {
       isDisabled: !lessonTypesMap[option],
       value: option,
-      label: option,
+      label: t(`lessonType:${option}`),
     };
   });
 
@@ -232,12 +232,12 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             gap="3"
           >
             <Tag size="sm" variant="outline" colorScheme={colorScheme}>
-              <TagLabel>{selectedLessonType}</TagLabel>
+              <TagLabel>{t(`lessonType:${selectedLessonType}`)}</TagLabel>
             </Tag>
             <Heading size="sm" noOfLines={1}>
               {selectedLessonType &&
                 lessonTypesMap[selectedLessonType].coaches
-                  .map((coach) => coach.name)
+                  .map((coach) => t(`coach:${coach.name}`))
                   .join(", ")}
             </Heading>
             <Text noOfLines={1}>
@@ -277,7 +277,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
       <Flex flexDirection="column" justifyContent="space-between" h="full">
         <VStack alignItems="flex-start" spacing={4} overflow="hidden">
           <FormControl>
-            <FormLabel>Coaches</FormLabel>
+            <FormLabel>{t("Coaches")}</FormLabel>
             <CheckboxGroup
               options={coachesOptions}
               value={selectedCoaches}
@@ -287,7 +287,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           </FormControl>
 
           <FormControl>
-            <FormLabel>Type</FormLabel>
+            <FormLabel>{t("Type")}</FormLabel>
             <RadioGroup
               // TODO: Find better solution
               key={selectedCoaches.length}
@@ -300,7 +300,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
           <Flex width="full" justifyContent="space-between">
             <Button colorScheme={"gray"} onClick={resetForm}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               variant="ghost"
@@ -308,14 +308,14 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               onClick={showManualDateTimeInput}
               isDisabled={selectedCoaches.length === 0 || !selectedLessonType}
             >
-              Manual
+              {t("Manual")}
             </Button>
             <Button
               colorScheme={colorScheme}
               onClick={showFreeSlots}
               isDisabled={selectedCoaches.length === 0 || !selectedLessonType}
             >
-              Show free slots
+              {t("Show free slots")}
             </Button>
           </Flex>
         </VStack>
@@ -358,7 +358,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           />
         </FormControl>
         <FormControl>
-          <FormLabel>Name</FormLabel>
+          <FormLabel>{t("Name")}</FormLabel>
           <Input
             value={label}
             onChange={(evt) => setLabel(evt.target.value)}
@@ -368,7 +368,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
         <Flex width="full" justifyContent="space-between">
           <Button colorScheme={"gray"} onClick={resetForm}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             colorScheme={colorScheme}
@@ -386,7 +386,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     return (
       <VStack alignItems="flex-start" gap="8">
         <FormControl>
-          <FormLabel>Name</FormLabel>
+          <FormLabel>{t("Name")}</FormLabel>
           <Input
             value={label}
             onChange={(evt) => setLabel(evt.target.value)}
@@ -397,7 +397,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
         <Flex width="full" justifyContent="space-between">
           <Button colorScheme={"gray"} onClick={resetForm}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             colorScheme={colorScheme}

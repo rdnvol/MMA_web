@@ -19,12 +19,14 @@ import { getCurrentWeek } from "../../../utils/calendar";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Logo } from "../../base/Logo/Logo";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export type CalendarControlProps = {};
 
 type View = "1" | "3" | "7";
 
 export const CalendarControl: React.FC<CalendarControlProps> = () => {
+  const { t } = useTranslation("common");
   const [, setSearchParams] = useSearchParams();
 
   const { data: coachesData = [] } = useGetCoachesQuery("");
@@ -76,7 +78,7 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
                 value={String(coach.id)}
                 colorScheme={getCoachColorScheme(coach)}
               >
-                {coach.name}
+                {t(`coach:${coach.name}`)}
               </Checkbox>
             ))}
           </HStack>
@@ -90,7 +92,9 @@ export const CalendarControl: React.FC<CalendarControlProps> = () => {
             icon={<Icon as={FaChevronLeft} />}
             onClick={prev}
           />
-          <Button onClick={() => setSelectedDate(new Date())}>Today</Button>
+          <Button onClick={() => setSelectedDate(new Date())}>
+            {t("Today")}
+          </Button>
           <IconButton
             aria-label="next"
             icon={<Icon as={FaChevronRight} />}

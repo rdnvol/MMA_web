@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { Lesson, LessonType } from "../../../../models";
 import CalendarHeader from "./CalendarHeader";
 import CalendarColumn from "./CalendarColumn";
+import { useTranslation } from "react-i18next";
 
 export type CalendarTableProps = {
   dateRange: Date[];
@@ -31,10 +32,11 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
   onSelectFreeSlot,
   onSelectLesson,
 }) => {
+  const { t } = useTranslation("common");
   return (
     <HStack spacing={0} alignItems="flex-start" position="relative">
       <VStack spacing={0} position="sticky" zIndex={2} left={0} bg="white">
-        <CalendarHeader header="Time" />
+        <CalendarHeader header={t<string>("Time")} />
         {timeData.map((time) => (
           <TimeBox key={time}>{time}</TimeBox>
         ))}

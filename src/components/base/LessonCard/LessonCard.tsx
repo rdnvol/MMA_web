@@ -1,5 +1,6 @@
 import { Box, Card, VStack, Text, Flex, useMediaQuery } from "@chakra-ui/react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import { COACHES, Position } from "../../../constants/data";
 import { cellHeight, cellWidth } from "../../../constants/table";
@@ -26,6 +27,7 @@ export type LessonCardProps = {
 export const LessonCard: React.FC<LessonCardProps> = (
   props: LessonCardProps
 ) => {
+  const { t } = useTranslation("common");
   const [isLargerThan600] = useMediaQuery("(min-width: 600px)");
   const maxWidth = isLargerThan600 ? cellWidth.md : cellWidth.sm;
 
@@ -100,7 +102,7 @@ export const LessonCard: React.FC<LessonCardProps> = (
           {label}
         </Text>
         <Text fontSize="xs" as="i" noOfLines={1}>
-          {props.lessonType?.type}
+          {props.lessonType ? t(`lessonType:${props.lessonType.type}`) : ""}
         </Text>
       </Flex>
     </Card>
